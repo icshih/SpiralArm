@@ -2,6 +2,8 @@
 
 ## Position
 
+galatic longtitude: l < 17 && l > 285 && (l > 72 && l < 222)
+
 ## Colour
 
 Because Gaia DR1 does not have colour information, it is necessary to cross-match external catalogue(s) containing the photometry info.
