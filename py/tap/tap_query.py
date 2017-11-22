@@ -13,10 +13,10 @@ for u in np.asarray(table.array['ucac4_id'], dtype='str'):
 from astroquery.vizier import Vizier
 ucac4_table = 'I/322A/out'
 for id in uid:
-    result = Vizier.query_constraints(columns=["UCAC4", "Bmag", "e_Bmag", "Vmag", "e_Vmag"], catalog=ucac4_table, UCAC4='="{0}"'.format(id))
+    result = Vizier.query_constraints(catalog=ucac4_table, UCAC4='="{0}"'.format(id))
     data = result['I/322A/out']
     b = data.field('Bmag').data[0]
-    eb = data.field('e_Bmag').data[0]
+    # eb = data.field('e_Bmag').data[0]
     v = data.field('Vmag').data[0]
-    ev = data.field('e_Vmag').data[0]
-    print('{0} {1} {2} {3} {4}'.format(id, b, eb, v, ev))
+    # ev = data.field('e_Vmag').data[0]
+    print('{0} {1} {2}'.format(id, b, v))

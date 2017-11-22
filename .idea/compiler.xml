@@ -6,11 +6,13 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="IvoaXmlJavaModel" />
         <module name="JSpiralArm" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="JSpiralArm" target="1.5" />
+      <module name="IvoaXmlJavaModel" target="1.5" />
+      <module name="JSpiralArm" target="9" />
     </bytecodeTargetLevel>
   </component>
 </project>
