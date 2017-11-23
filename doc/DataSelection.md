@@ -2,7 +2,7 @@
 
 ## Position
 
-galatic longtitude: l < 17 && l > 285 && (l > 72 && l < 222)
+Galatic longitudes: l < 17, or l > 285, or (l > 72 && l < 222)
 
 ## Colour
 
