@@ -19,6 +19,15 @@ for d in data:
     id_table[u_id] = g_id
 
 ## Create a table: Gaia_UCAC4_COLOUR {STRING gaia_source_id NOT NULL, STRING ucac4_id NOT NULL, DOUBLE b_mag, DOUBLE v_mag}
+import psycopg2
+URI = 'postgresql://{}@{}/{}'.format('postgres', 'localhost', 'postgres')
+conn = psycopg2.connect(URI)
+cur = conn.cursor()
+cur.execute('CREATE TABLE gaia_ucac4_colour ('
+            'gaia_source_id bigint NOT NULL, '
+            'ucac4_id text NOT NULL,'
+            'b_mag real,'
+            'v_mag real);')
 
 from astroquery.vizier import Vizier
 ucac4_table = 'I/322A/out'
