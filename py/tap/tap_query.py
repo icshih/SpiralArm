@@ -4,6 +4,20 @@ query = 'SELECT source_id, original_ext_source_id AS ucac4_id FROM gaiadr1.ucac4
 job = Gaia.launch_job_async(query, output_file='/Users/icshih/Documents/Research/SpiralArm/data/saved/'
                                                'gaia_source_xm_ucac4.vot', dump_to_file=True)
 
+# alternative query
+# SELECT g.source_id, g.l, g.b, g.ra, g.dec, g.pmra, g.pmdec, u.ucac4_id
+# FROM (
+#     SELECT source_id, original_ext_source_id AS ucac4_id
+#     FROM gaiadr1.ucac4_best_neighbour
+#     WHERE source_id IN (
+#         SELECT source_id
+#         FROM gaiadr1.gaia_source
+#         WHERE l < 17 OR l > 285 OR (l > 72 AND l < 222)
+#     )
+# ) AS u
+# JOIN gaiadr1.gaia_source AS g
+# ON (g.source_id = u.source_id)
+
 # from astropy.io.votable import parse
 # votable = parse('/Users/icshih/Documents/Research/SpiralArm/data/saved/gaia_source_xm_ucac4.vot')
 # data = votable.get_first_table()
