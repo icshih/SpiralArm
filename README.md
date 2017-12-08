@@ -13,7 +13,7 @@ Main reference: ApJ, 844, 118, 2017
 - colour
 - astrometry parameters and radial velocity
 
-## Selection critirial
+## Selection criteria
 
 - color
 - distance
