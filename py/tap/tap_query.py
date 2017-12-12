@@ -24,6 +24,7 @@ def db_create_table(conn):
                 'pmra double precision,'
                 'pmdec double precision,'
                 'parallax double precision,'
+                'parallax_error double precision,'
                 'phot_g_mean_mag double precision,'
                 'phot_g_mean_flux double precision,'
                 'ucac4_id text NOT NULL,'
@@ -40,13 +41,13 @@ def get_and_ingest(constraint):
         vmag = float(data.field('Vmag')[i])
         g_tuple = id_dict[ucac4]
         insert.execute(
-            'INSERT INTO gaia_ucac4_colour (gaia_source_id, l, b, ra, dec, pmra, pmdec, parallax, phot_g_mean_mag, phot_g_mean_flux, ucac4_id, b_mag, v_mag) '
-            'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);',
-            (g_tuple[0], g_tuple[1], g_tuple[2], g_tuple[3], g_tuple[4], g_tuple[5], g_tuple[6], g_tuple[7], g_tuple[8],g_tuple[9], ucac4, bmag, vmag))
+            'INSERT INTO gaia_ucac4_colour (gaia_source_id, l, b, ra, dec, pmra, pmdec, parallax, parallax_error, phot_g_mean_mag, phot_g_mean_flux, ucac4_id, b_mag, v_mag) '
+            'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);',
+            (g_tuple[0], g_tuple[1], g_tuple[2], g_tuple[3], g_tuple[4], g_tuple[5], g_tuple[6], g_tuple[7], g_tuple[8], g_tuple[9], g_tuple[10], ucac4, bmag, vmag))
     conn_.commit()
 
 # alternative query
-query = 'SELECT g.source_id, g.l, g.b, g.ra, g.dec, g.pmra, g.pmdec, g.parallax, g.phot_g_mean_mag, g.phot_g_mean_flux, u.ucac4_id ' \
+query = 'SELECT g.source_id, g.l, g.b, g.ra, g.dec, g.pmra, g.pmdec, g.parallax, g.parallax_error, g.phot_g_mean_mag, g.phot_g_mean_flux, u.ucac4_id ' \
         'FROM (' \
         'SELECT source_id, original_ext_source_id AS ucac4_id ' \
         'FROM gaiadr1.ucac4_best_neighbour ' \
@@ -57,7 +58,7 @@ query = 'SELECT g.source_id, g.l, g.b, g.ra, g.dec, g.pmra, g.pmdec, g.parallax,
         ') AND number_of_mates = 0 ' \
         ') AS u ' \
         'JOIN gaiadr1.gaia_source AS g ON (g.source_id = u.source_id)' \
-        'WHERE g.pmra IS NOT null AND g.pmdec IS NOT null'
+        'WHERE g.pmra IS NOT null AND g.pmdec IS NOT null AND g.parallax_error/g.parallax < 0.2'
 
 # from astropy.io.votable import parse
 # votable = parse('/Users/icshih/Documents/Research/SpiralArm/data/saved/gaia_source_xm_ucac4.vot')
@@ -86,9 +87,10 @@ for d in data:
     pmra = f['pmra'].item(0)
     pmdec = f['pmdec'].item(0)
     parallax = f['parallax'].item(0)
+    parallax_error = f['parallax_error'].item(0)
     gmag = f['phot_g_mean_mag'].item(0)
     gflux = f['phot_g_mean_flux'].item(0)
-    id_dict[u_id] = g_id, l, b, ra, dec, pmra, pmdec, parallax, gmag, gflux
+    id_dict[u_id] = g_id, l, b, ra, dec, pmra, pmdec, parallax, parallax_error, gmag, gflux
     constraint = constraint + ';' + u_id
     count = count + 1
     if (count >= 500):
