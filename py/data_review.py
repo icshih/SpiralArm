@@ -30,7 +30,7 @@ def sky_distribution(conn):
     ax1.set_ylabel('Galactic Lat.')
     ax1.scatter(gal.l.wrap_at(180 * u.deg).radian, gal.b.radian, s=0.1)
     ax1.grid(True)
-    plt.show()
+    plt.savefig('sky_distribution.png')
 
 
 def data_distribution(conn):
@@ -72,7 +72,9 @@ def data_distribution(conn):
     ax4.set_xlabel('mag')
     ax4.set_xlim(5, 15)
     ax4.hist(data[3])
-    plt.show()
+
+    plt.savefig('data_distribution.png')
+    # plt.show()
 
 
 def data_correlation(data):
@@ -112,11 +114,11 @@ def parallax_distribution(conn):
     dist = ax1.scatter(data[0], data[1] / data[0], c=data[2], cmap=colr, norm=norm, s=0.3)
     cb = fig.colorbar(dist, orientation='vertical')
     cb.set_label('Phot G mean mag')
-    plt.show()
+    plt.savefig('parallax_distribution.png')
+    # plt.show()
 
 
 conn_ = db_connect()
-
-# sky_distribution(conn_)
-# data_distribution(conn_)
+sky_distribution(conn_)
+data_distribution(conn_)
 parallax_distribution(conn_)

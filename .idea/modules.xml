@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/IvoaXmlJavaModel/IvoaXmlJavaModel.iml" filepath="$PROJECT_DIR$/IvoaXmlJavaModel/IvoaXmlJavaModel.iml" />
-      <module fileurl="file://$PROJECT_DIR$/JSpiralArm/JSpiralArm.iml" filepath="$PROJECT_DIR$/JSpiralArm/JSpiralArm.iml" />
       <module fileurl="file://$PROJECT_DIR$/SpiralArm.iml" filepath="$PROJECT_DIR$/SpiralArm.iml" />
     </modules>
   </component>

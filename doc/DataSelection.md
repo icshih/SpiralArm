@@ -1,14 +1,17 @@
 # Data Selection
 
+For Gaia DR1 (afterward *GDR1*) data, our data selection critiria are based on position, colour and distance
+
 ## Position
 
-Galatic longitudes: l < 17, or l > 285, or (l > 72 && l < 222)
+- Galatic longitudes: **l** < 17, or **l** > 285, or (**l** > 72 && *l* < 222).
+- Galatic latitudes: **NO USE**
 
 ## Colour
 
-Because Gaia DR1 does not have colour information, it is necessary to cross-match external catalogue(s) containing the photometry info.
+Because GDR1 does not have colour information, we need to cross-match the external catalogue(s) containing such info.
 
-We choose the external catalogues which have been cross-matched with Gaia DR1 by Gaia DPAC[1]. The externals must cover the galactic plane region, so the below catalogues are selected for further study.
+Gaia/ESA has already generated several pre-cross-matched catalogues([1]), from which we select those have good coverage of the galactic plane regions,
 
 * UCAC4, [Zacharias et al. 2013](https://ui.adsabs.harvard.edu/#abs/2013AJ....145...44Z/abstract):
 The photometry data is from 2MASS (J, K, B, V) and APASS (r, i)
@@ -24,20 +27,38 @@ The Photometry data is from 2MASS (IR: J, H, Ks) and USNO-B1.0 (Optical: B, R, I
 * allWISE [Cutri & et al. 2013](https://ui.adsabs.harvard.edu/#abs/2013yCat.2328....0C/abstract):
 This is an infra-red survey, so we will not use the data here.
 
-Using "the Best Neighbour" cross-match table
+To save time, we trust that "the Best Neighbour" cross-match table ([1]) indeed provides the best match for us.
+
 
 ## Distance
 
-We have collected data derived from the cross-matching of Gaia DR1 - UCAC4 catalogues. The data contains **parallax** and **parallax error** from Gaia[2]. Although parallax is the inverse of distance, 1/r, we cannot apply this directly to our data, because what we really have is the *measured* value of the true distance.
-We also need to consider the uncertainty which can distort the distance estimation greatly. To properly estimate the distance from parallax, I refer to the methodology of [Bailer-Jones, 2015](https://ui.adsabs.harvard.edu/#abs/2015PASP..127..994B/abstract).
+Although parallax is the inverse of distance **r**, we cannot apply this relationship directly to obtain the distance, because what we really have is a *measured* value of parallax which does not refer to the true distance and the uncertainty of the parallax can distort the distance estimation greatly (see [Bailer-Jones, 2015]).
 
-In short, when the ratio of parallax error to parallax (*f*) is smaller enough, the distance and the uncertainty estimated by the measurement model* is quite acceptable, thus that range of *f* is quite limit. 
+The likelihood of a measured parallax referring to true distance can only work well if the ratio of parallax error to parallax (*f*) is smaller enough. In such case, the distance and its uncertainty estimated by a measurement model is quite acceptable.
 
-In this work, we need to select the objects within 3 kpc. This is not a problem in the DR1 as the objects with parallax data are Tycho sources which are generally bright (< 14 G mag) and with good quality of parallax, we can use the model to find out the distance without to much problem.
+In this work, we need to select the objects within 3 kpc. In GDR1, only primary objects (~2M, [2]) have parallax values and they are generally bright (< 14 G mag), we can use the model to find out the distance without too much problem.
  
-Here, we set *f = 0.2* as the criteria to select the data.
+Here, we set parallax > 0([3]) and  *f <= 0.2* as the criteria to further select the data, see the figure below,
 
-However, we will need a better way to treat the DR2 data as most of them will have parallax values outside the confort zone of the model, this will be the next step.
+![parallax distribution](figures/parallax_distribution.png "parallax distribution")
+
+However, we will need a better way to treat the DR2 data as most of them will have parallax values outside the comfort zone of the model, this will be the next step.
+
+## Summary
+
+
+![Sky distribution of the selected objects](figures/sky_distribution.png) 
+
+The figure above shows the objects been selected according to not only the position but also the colour and parallax. 
+
+![data distribution](figures/data_distribution.png "data distribution")
+
+The figure above show the photometry distribution of the selected data.
 
 [1]: https://arxiv.org/abs/1710.06739  "Gaia Data Release 1. Cross-match with external catalogues - Algorithm and results"
-[2]: Only the *primary* sources
+
+[2]: These are Tycho sources with the combined Hipparcos and Gaia astrometric solutions. 
+
+[Bailer-Jones, 2015]: https://ui.adsabs.harvard.edu/#abs/2015PASP..127..994B/abstract
+
+[3]: The negative value of a measured parallax probably refers to distance star.
