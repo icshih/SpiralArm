@@ -5,40 +5,6 @@ import numpy as np
 # import matplotlib.pyplot as plt
 from multiprocessing import Pool
 
-def distance_range(max_distance, step):
-    d = 0.01
-    while d <= max_distance:
-        yield d
-        d += step
-
-
-def prob_parallax_single(distance):
-    p = norm.pdf(2.3537642724378127, loc=1.0/distance, scale=0.07797686605256408)
-    return p
-
-def prob_parallax(parallax, parallax_error, distance):
-    p = norm.pdf(parallax, loc=1.0/distance, scale=parallax_error)
-    return p
-
-
-def prob_parallax_distribution(parallax, parallax_error, g_distance):
-    ds = list(g_distance)
-    p = prob_parallax(parallax, parallax_error, d)
-
-
-def cumulate(prob_value):
-    cum_prob = np.empty(prob_value.size)
-    cum = 0;
-    for j, p in enumerate(prob_value):
-        cum = cum + p
-        cum_prob[j] = cum
-    return (cum_prob/np.sum(prob_value))*100.0
-
-
-def find_nearest(array, value):
-    idx = (np.abs(array-value)).argmin()
-    return idx
-
 
 def db_connect():
     URI = 'postgresql://{}@{}:{}/{}'.format('postgres', 'localhost', '10000', 'postgres')
@@ -57,31 +23,68 @@ def db_create_table(conn):
     conn.commit()
 
 
+def distance_range(max_distance, step):
+    d = 0.01
+    while d <= max_distance:
+        yield d
+        d += step
 
 
-def get_distance(parallax_, parallax_error_, distance_kpc_):
-    probability = prob_parallax(parallax_, parallax_error_, distance_kpc_)
-    max_prob = np.max(probability['prob'])
-    ind_moment = find_nearest(probability['prob'], max_prob)
-    cum_prob = cumulate(probability['prob'])
-    ind_5 = find_nearest(cum_prob, 5.0)
-    ind_50 = find_nearest(cum_prob, 50.0)
-    ind_95 = find_nearest(cum_prob, 95.0)
-    moment_ = probability['dist'][ind_moment]
-    dist_ = probability['dist'][ind_50]
-    lower_ = probability['dist'][ind_50] - probability['dist'][ind_5]
-    upper_ = probability['dist'][ind_95] - probability['dist'][ind_50]
-    return moment_, dist_, lower_, upper_
+def find_nearest(array, value):
+    idx = (np.abs(array - value)).argmin()
+    return idx
+
+
+class Distance:
+
+    def __init__(self, parallax, parallax_error):
+        self.parallax = parallax
+        self.parallax_error = parallax_error
+        self.pool_size = 1
+        self.dist_prob = None
+
+    def get_likelihood(self, distance):
+        return norm.pdf(self.parallax, loc=1.0 / distance, scale=self.parallax_error)
+
+    def get_distance_prob(self, distances):
+        d_list = list(distances)
+        print(d_list)
+        with Pool(self.pool_size) as P:
+            p_list = P.map(self.get_likelihood, d_list)
+            print(p_list)
+        self.dist_prob = np.asarray([d_list, p_list], dtype={'names': ['dist', 'prob'], 'formats': ['f4', 'f8']})
+
+    def get_distance_cum(self):
+        cum_prob = np.empty(self.dist_prob.size)
+        cum = 0;
+        for j, p in enumerate(self.dist_prob['prob']):
+            cum = cum + p
+            cum_prob[j] = cum
+        return (cum_prob / np.sum(self.dist_prob['prob'])) * 100.0
+
+    def get_result(self):
+        max_prob = np.max(self.dist_prob['prob'])
+        ind_moment = find_nearest(self.dist_prob['prob'], max_prob)
+        cum_prob = self.get_distance_cum()
+        ind_5 = find_nearest(cum_prob, 5.0)
+        ind_50 = find_nearest(cum_prob, 50.0)
+        ind_95 = find_nearest(cum_prob, 95.0)
+        moment = self.dist_prob['dist'][ind_moment]
+        mean = self.dist_prob['dist'][ind_50]
+        lower = self.dist_prob['dist'][ind_50] - self.dist_prob['dist'][ind_5]
+        upper = self.dist_prob['dist'][ind_95] - self.dist_prob['dist'][ind_50]
+        return moment, mean, lower, upper
+
 
 if __name__ == "__main__":
-
     parallax_ = 2.3537642724378127
     parallax_error_ = 0.07797686605256408
-
     distance_kpc = distance_range(20.0, 0.01)
 
-    with Pool(5) as p:
-        print(p.map(prob_parallax_single, list(distance_kpc)))
+    test = Distance(parallax_, parallax_error_)
+    test.pool_size = 5
+    test.get_distance_prob(distance_kpc)
+    print(test.dist_prob)
 
     # conn_ = db_connect()
     # db_create_table(conn_)
@@ -102,8 +105,6 @@ if __name__ == "__main__":
     #         conn_.commit()
     #         count = 0
     # conn_.commit()
-
-
 
 # distance from 0 to 20 kpc
 # providing the parallax_error and for each distance r
@@ -136,6 +137,3 @@ if __name__ == "__main__":
 # ax2.set_xlim(dist_m[0], dist_m[-1])
 # ax2.plot(dist_m, cum_prob)
 # plt.show()
-
-
-
