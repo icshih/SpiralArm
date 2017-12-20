@@ -59,28 +59,29 @@ def get_distance(parallax_, parallax_error_, distance_kpc_):
     upper_ = probability['dist'][ind_95] - probability['dist'][ind_50]
     return moment_, dist_, lower_, upper_
 
+if __name__ == "__main__":
 
-distance_kpc = np.arange(0.01, 20.0, 0.01)
+    distance_kpc = np.arange(0.01, 20.0, 0.01)
 
-conn_ = db_connect()
-db_create_table(conn_)
-cur = conn_.cursor()
-cur.execute('SELECT gaia_source_id, parallax, parallax_error FROM gaia_ucac4_colour WHERE parallax > 0;')
+    conn_ = db_connect()
+    db_create_table(conn_)
+    cur = conn_.cursor()
+    cur.execute('SELECT gaia_source_id, parallax, parallax_error FROM gaia_ucac4_colour WHERE parallax > 0;')
 
-insert = conn_.cursor()
-count = 0
-for record in cur:
-    parallax = record[1]
-    parallax_error = record[2]
-    moment, dist, lower, upper = get_distance(parallax, parallax_error, distance_kpc)
-    print(record[0], parallax, parallax_error, moment, dist, lower, upper)
-    insert.execute('INSERT INTO gaia_distance (gaia_source_id, moment, distance, distance_lower, distance_upper) VALUES (%s, %s, %s, %s, %s);',
+    insert = conn_.cursor()
+    count = 0
+    for record in cur:
+        parallax = record[1]
+        parallax_error = record[2]
+        moment, dist, lower, upper = get_distance(parallax, parallax_error, distance_kpc)
+        print(record[0], parallax, parallax_error, moment, dist, lower, upper)
+        insert.execute('INSERT INTO gaia_distance (gaia_source_id, moment, distance, distance_lower, distance_upper) VALUES (%s, %s, %s, %s, %s);',
                    (record[0], float(moment), float(dist), float(lower), float(upper)))
-    count = count + 1
-    if (count >= 500):
-        conn_.commit()
-        count = 0
-conn_.commit()
+        count = count + 1
+        if (count >= 500):
+            conn_.commit()
+            count = 0
+    conn_.commit()
 
 
 
