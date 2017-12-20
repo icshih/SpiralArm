@@ -43,16 +43,16 @@ class Distance:
         self.pool_size = 1
         self.dist_prob = None
 
-    def get_likelihood(self, distance):
+    def likelihood(self, distance):
         return norm.pdf(self.parallax, loc=1.0 / distance, scale=self.parallax_error)
 
     def get_distance_prob(self, distances):
         d_list = list(distances)
-        print(d_list)
         with Pool(self.pool_size) as P:
-            p_list = P.map(self.get_likelihood, d_list)
-            print(p_list)
-        self.dist_prob = np.asarray([d_list, p_list], dtype={'names': ['dist', 'prob'], 'formats': ['f4', 'f8']})
+            p_list = P.map(self.likelihood, d_list)
+        self.dist_prob = np.zeros(len(d_list), dtype={'names': ['dist', 'prob'], 'formats': ['f4', 'f8']})
+        for i, d in enumerate(d_list):
+            self.dist_prob[i] = (d, p_list[i])
 
     def get_distance_cum(self):
         cum_prob = np.empty(self.dist_prob.size)
