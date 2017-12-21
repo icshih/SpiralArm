@@ -63,7 +63,6 @@ class Distance:
             self.dist_prob[i] = (d, p_list[i])
         print(stop - start)
 
-
     def get_distance_cum(self):
         cum_prob = np.empty(self.dist_prob.size)
         cum = 0;
