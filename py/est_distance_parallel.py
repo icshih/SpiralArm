@@ -1,9 +1,11 @@
+import timeit
+from multiprocessing import Pool
+
+# import numpy.ma as ma
+import matplotlib.pyplot as plt
+import numpy as np
 import psycopg2
 from scipy.stats import norm
-import numpy as np
-# import numpy.ma as ma
-# import matplotlib.pyplot as plt
-from multiprocessing import Pool
 
 
 def db_connect():
@@ -36,23 +38,31 @@ def find_nearest(array, value):
 
 
 class Distance:
+    pool_size = 1
 
     def __init__(self, parallax, parallax_error):
         self.parallax = parallax
         self.parallax_error = parallax_error
-        self.pool_size = 1
         self.dist_prob = None
+        self.dist_cumu = None
+        self.moment = None
+        self.mean = None
+        self.lower = None
+        self.upper = None
 
     def likelihood(self, distance):
         return norm.pdf(self.parallax, loc=1.0 / distance, scale=self.parallax_error)
 
     def get_distance_prob(self, distances):
-        d_list = list(distances)
+        self.dist_prob = np.zeros(distances.size, dtype={'names': ['dist', 'prob'], 'formats': ['f4', 'f8']})
+        start = timeit.default_timer()
         with Pool(self.pool_size) as P:
-            p_list = P.map(self.likelihood, d_list)
-        self.dist_prob = np.zeros(len(d_list), dtype={'names': ['dist', 'prob'], 'formats': ['f4', 'f8']})
-        for i, d in enumerate(d_list):
+            p_list = P.map(self.likelihood, distances)
+        stop = timeit.default_timer()
+        for i, d in enumerate(distances):
             self.dist_prob[i] = (d, p_list[i])
+        print(stop - start)
+
 
     def get_distance_cum(self):
         cum_prob = np.empty(self.dist_prob.size)
@@ -60,44 +70,59 @@ class Distance:
         for j, p in enumerate(self.dist_prob['prob']):
             cum = cum + p
             cum_prob[j] = cum
-        return (cum_prob / np.sum(self.dist_prob['prob'])) * 100.0
+        self.dist_cumu = cum_prob
+
+    def normalise(self):
+        return (self.dist_cumu / np.sum(self.dist_prob['prob'])) * 100.0
 
     def get_result(self):
         max_prob = np.max(self.dist_prob['prob'])
         ind_moment = find_nearest(self.dist_prob['prob'], max_prob)
-        cum_prob = self.get_distance_cum()
+        self.get_distance_cum()
+        cum_prob = self.normalise()
         ind_5 = find_nearest(cum_prob, 5.0)
         ind_50 = find_nearest(cum_prob, 50.0)
         ind_95 = find_nearest(cum_prob, 95.0)
-        moment = self.dist_prob['dist'][ind_moment]
-        mean = self.dist_prob['dist'][ind_50]
-        lower = self.dist_prob['dist'][ind_50] - self.dist_prob['dist'][ind_5]
-        upper = self.dist_prob['dist'][ind_95] - self.dist_prob['dist'][ind_50]
-        return moment, mean, lower, upper
+        self.moment = self.dist_prob['dist'][ind_moment]
+        self.mean = self.dist_prob['dist'][ind_50]
+        self.lower = self.dist_prob['dist'][ind_50] - self.dist_prob['dist'][ind_5]
+        self.upper = self.dist_prob['dist'][ind_95] - self.dist_prob['dist'][ind_50]
+
+    def display(self):
+        fig = plt.figure(figsize=(12, 12))
+        ax1 = fig.add_subplot(211)
+        ax1.set_title('parallax {:.4f}, fraction: {:.2f}'.format(self.parallax, self.parallax_error / self.parallax))
+        ax1.set_xlabel('distance (kpc)')
+        ax1.set_ylabel('probability')
+        ax1.set_xlim(self.dist_prob['dist'][0], self.dist_prob['dist'][-1])
+        ax1.plot(self.dist_prob['dist'], self.dist_prob['dist']['prob'])
+
+        ax2 = fig.add_subplot(212)
+        ax2.set_xlabel('distance (kpc)')
+        ax2.set_ylabel('percentile')
+        ax2.set_xlim(self.dist_prob['dist'][0], self.dist_prob['dist'][-1])
+        ax2.plot(self.dist_prob['dist'], self.normalise())
+        plt.show()
 
 
 if __name__ == "__main__":
-    parallax_ = 2.3537642724378127
-    parallax_error_ = 0.07797686605256408
-    distance_kpc = distance_range(20.0, 0.01)
+    distance_range = np.arange(0.01, 20.0, 0.01)
+    Distance.pool_size = 4
 
-    test = Distance(parallax_, parallax_error_)
-    test.pool_size = 5
-    test.get_distance_prob(distance_kpc)
-    print(test.dist_prob)
+    conn_ = db_connect()
+    db_create_table(conn_)
+    cur = conn_.cursor()
+    cur.execute('SELECT gaia_source_id, parallax, parallax_error FROM gaia_ucac4_colour WHERE parallax > 0;')
 
-    # conn_ = db_connect()
-    # db_create_table(conn_)
-    # cur = conn_.cursor()
-    # cur.execute('SELECT gaia_source_id, parallax, parallax_error FROM gaia_ucac4_colour WHERE parallax > 0;')
-    #
-    # insert = conn_.cursor()
-    # count = 0
-    # for record in cur:
-    #     parallax = record[1]
-    #     parallax_error = record[2]
-    #     moment, dist, lower, upper = get_distance(parallax, parallax_error, distance_kpc)
-    #     print(record[0], parallax, parallax_error, moment, dist, lower, upper)
+    insert = conn_.cursor()
+    count = 0
+    for record in cur:
+        parallax_ = record[1]
+        parallax_error_ = record[2]
+        d = Distance(parallax_, parallax_error_)
+        d.get_distance_prob(distance_range)
+        d.get_result()
+        print(record[0], parallax_, parallax_error_, d.moment, d.mean, d.lower, d.upper)
     #     insert.execute('INSERT INTO gaia_distance (gaia_source_id, moment, distance, distance_lower, distance_upper) VALUES (%s, %s, %s, %s, %s);',
     #                (record[0], float(moment), float(dist), float(lower), float(upper)))
     #     count = count + 1
@@ -105,35 +130,3 @@ if __name__ == "__main__":
     #         conn_.commit()
     #         count = 0
     # conn_.commit()
-
-# distance from 0 to 20 kpc
-# providing the parallax_error and for each distance r
-
-# mas
-# parallax = 2.3537642724378127
-# parallax_error = 0.07797686605256408
-# f = parallax_error/parallax
-# pc
-
-# dist_m = probability['dist']
-#
-# cum_prob = cumulate(probability['prob'])
-# ind_25 = find_nearest(cum_prob, 25.0)
-# ind_50 = find_nearest(cum_prob, 50.0)
-# ind_75 = find_nearest(cum_prob, 75.0)
-# print('distance: {:.3f} kpc [{:.3f},{:.3f}]'.format(dist_m[ind_50], dist_m[ind_25]-dist_m[ind_50], dist_m[ind_75]-dist_m[ind_50]));
-#
-# fig = plt.figure(figsize=(12, 12))
-# ax1 = fig.add_subplot(211)
-# ax1.set_title('parallax {:.4f}, fraction: {:.2f}'.format(parallax, f))
-# ax1.set_xlabel('distance (kpc)')
-# ax1.set_ylabel('probability')
-# ax1.set_xlim(dist_m[0], dist_m[-1])
-# ax1.plot(dist_m, probability['prob'])
-#
-# ax2 = fig.add_subplot(212)
-# ax2.set_xlabel('distance (kpc)')
-# ax2.set_ylabel('percentile')
-# ax2.set_xlim(dist_m[0], dist_m[-1])
-# ax2.plot(dist_m, cum_prob)
-# plt.show()
