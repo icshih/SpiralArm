@@ -1,9 +1,11 @@
-import psycopg2
-from scipy.stats import norm
-import numpy as np
+import timeit
+from multiprocessing import Pool
+
 # import numpy.ma as ma
 import matplotlib.pyplot as plt
-from multiprocessing import Pool
+import numpy as np
+import psycopg2
+from scipy.stats import norm
 
 
 def db_connect():
@@ -53,10 +55,14 @@ class Distance:
 
     def get_distance_prob(self, distances):
         self.dist_prob = np.zeros(distances.size, dtype={'names': ['dist', 'prob'], 'formats': ['f4', 'f8']})
+        start = timeit.default_timer()
         with Pool(self.pool_size) as P:
             p_list = P.map(self.likelihood, distances)
+        stop = timeit.default_timer()
         for i, d in enumerate(distances):
             self.dist_prob[i] = (d, p_list[i])
+        print(stop - start)
+
 
     def get_distance_cum(self):
         cum_prob = np.empty(self.dist_prob.size)
@@ -101,7 +107,7 @@ class Distance:
 
 if __name__ == "__main__":
     distance_range = np.arange(0.01, 20.0, 0.01)
-    Distance.pool_size = 5
+    Distance.pool_size = 4
 
     conn_ = db_connect()
     db_create_table(conn_)
