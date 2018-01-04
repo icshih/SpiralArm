@@ -37,7 +37,7 @@ def find_nearest(array, value):
     return idx
 
 
-class Distance:
+class Distance(object):
     pool_size = 1
 
     def __init__(self, parallax, parallax_error):
