@@ -7,6 +7,10 @@ import numpy as np
 import psycopg2
 from scipy.stats import norm
 
+import sys
+sys.path.append('py/lib/para2dis/distance')
+
+
 
 def db_connect():
     URI = 'postgresql://{}@{}:{}/{}'.format('postgres', 'localhost', '10000', 'postgres')
