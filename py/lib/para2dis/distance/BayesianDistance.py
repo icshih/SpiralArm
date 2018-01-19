@@ -14,34 +14,53 @@ def find_nearest(array, value):
 class BayesianDistance(object):
     """Determination of the distance from the observed parallax and parallax error based on Bayesian Statistics"""
     pool_size = 1
+    distance_range = np.arange(0.01, 20.0, 0.01)
 
-    def __init__(self, parallax, parallax_error):
+    def __init__(self, source_id, parallax, parallax_error, distances, pool_size):
+        self.gaia_source_id = source_id
         self.parallax = parallax
         self.parallax_error = parallax_error
+        self.distance_range = distances
+        self.pool_size = pool_size
         self.prior = None
         self.__dist_prob = None
         self.__dist_cumu = None
         self.moment = None
-        self.mean = None
-        self.lower = None
-        self.upper = None
+        self.distance = None
+        self.distance_lower = None
+        self.distance_upper = None
 
-    def likelihood(self, distance):
-        return norm.pdf(self.parallax, loc=1.0 / distance, scale=self.parallax_error)
+    # def __init__(self, source_id, parallax, parallax_error):
+    #     self.source_id = source_id
+    #     self.parallax = parallax
+    #     self.parallax_error = parallax_error
+    #     self.prior = None
+    #     self.__dist_prob = None
+    #     self.__dist_cumu = None
+    #     self.moment = None
+    #     self.mean = None
+    #     self.lower = None
+    #     self.upper = None
+
+    def likelihood(self, distances):
+        return norm.pdf(self.parallax, loc=1.0 / distances, scale=self.parallax_error)
 
     def set_prior(self, prior):
         self.prior = prior
 
-    def multi_prior_likelihood(self, distance):
-        return self.prior(distance) * self.likelihood(distance)
+    def multi_prior_likelihood(self, distances):
+        if self.prior is None:
+            return self.likelihood(distances)
+        else:
+            return self.prior(distances) * self.likelihood(distances)
 
-    def get_distance_posterior(self, distances):
-        dist_prob = np.zeros(distances.size, dtype={'names': ['dist', 'prob'], 'formats': ['f4', 'f8']})
+    def get_distance_posterior(self):
+        dist_prob = np.zeros(self.distance_range.size, dtype={'names': ['dist', 'prob'], 'formats': ['f4', 'f8']})
         start = timeit.default_timer()
         with Pool(self.pool_size) as P:
-            p_list = P.map(self.multi_prior_likelihood, distances)
+            p_list = P.map(self.multi_prior_likelihood, self.distance_range)
         stop = timeit.default_timer()
-        for i, d in enumerate(distances):
+        for i, d in enumerate(self.distance_range):
             dist_prob[i] = (d, p_list[i])
         print('cal. time: {:.2f} sec.'.format(stop - start))
         self.__dist_prob = dist_prob
@@ -66,9 +85,15 @@ class BayesianDistance(object):
         ind_50 = find_nearest(cum_prob, 50.0)
         ind_95 = find_nearest(cum_prob, 95.0)
         self.moment = self.__dist_prob['dist'][ind_moment]
-        self.mean = self.__dist_prob['dist'][ind_50]
-        self.lower = self.__dist_prob['dist'][ind_50] - self.__dist_prob['dist'][ind_5]
-        self.upper = self.__dist_prob['dist'][ind_95] - self.__dist_prob['dist'][ind_50]
+        self.distance = self.__dist_prob['dist'][ind_50]
+        self.distance_lower = self.__dist_prob['dist'][ind_50] - self.__dist_prob['dist'][ind_5]
+        self.distance_upper = self.__dist_prob['dist'][ind_95] - self.__dist_prob['dist'][ind_50]
+
+    def calculate(self):
+        self.get_distance_posterior()
+        self.get_result()
+        return (self.gaia_source_id, self.moment, self.distance, self.distance_lower, self.distance_upper)
+
 
     def display_distance_distribution(self):
         fig = plt.figure(figsize=(12, 12))
