@@ -16,31 +16,19 @@ class BayesianDistance(object):
     pool_size = 1
     distance_range = np.arange(0.01, 20.0, 0.01)
 
-    def __init__(self, source_id, parallax, parallax_error, distances, pool_size):
+    def __init__(self, source_id, parallax, parallax_error, prior, distances, pool_size):
         self.gaia_source_id = source_id
         self.parallax = parallax
         self.parallax_error = parallax_error
         self.distance_range = distances
         self.pool_size = pool_size
-        self.prior = None
+        self.prior = prior
         self.__dist_prob = None
         self.__dist_cumu = None
         self.moment = None
         self.distance = None
         self.distance_lower = None
         self.distance_upper = None
-
-    # def __init__(self, source_id, parallax, parallax_error):
-    #     self.source_id = source_id
-    #     self.parallax = parallax
-    #     self.parallax_error = parallax_error
-    #     self.prior = None
-    #     self.__dist_prob = None
-    #     self.__dist_cumu = None
-    #     self.moment = None
-    #     self.mean = None
-    #     self.lower = None
-    #     self.upper = None
 
     def likelihood(self, distances):
         return norm.pdf(self.parallax, loc=1.0 / distances, scale=self.parallax_error)
