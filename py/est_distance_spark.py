@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     spark = SparkSession.Builder() \
         .appName('distance') \
-        .master('local[2]') \
+        .master('local[4]') \
         .config('spark.driver.extraClassPath', '../resources/postgresql-42.1.4.jar') \
         .config('spark.network.timeout', '800') \
         .getOrCreate()
