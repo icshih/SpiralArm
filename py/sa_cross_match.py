@@ -87,9 +87,10 @@ def process(connection, dataset):
         count = count + 1
         if count >= 500:
             get_and_ingest(connection, id_dict, constraint)
-        count = 0
-        constraint = '<<'
-        id_dict.clear()
+            count = 0
+            constraint = '<<'
+            id_dict.clear()
+    get_and_ingest(connection, id_dict, constraint)
 
 
 if __name__ == '__main__':
