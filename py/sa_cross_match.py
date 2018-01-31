@@ -109,7 +109,7 @@ if __name__ == '__main__':
     PWORD = config.get('database', 'password')
     PORT = config.get('database', 'port')
     DBNAME = config.get('database', 'db')
-    OUTPUT = config.get('data', 'output')
+    OUTPUT = config.get('data', 'output.votable')
     url = 'postgresql://{0}:{1}@{2}:{3}/{4}'.format(USER, PWORD, HOST, PORT, DBNAME)
 
     conn = db_connect(url)
