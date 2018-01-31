@@ -27,7 +27,7 @@ def db_create_table(conn):
 
 
 if __name__ == "__main__":
-    """# bash>PYTHONPATH=/Users/icshih/Documents/Research/SpiralArm/py/lib python3 est_distance_spark.py /path/to/sa.conf"""
+    """# bash>PYTHONPATH=/Users/icshih/Documents/Research/SpiralArm/py/lib python3 est_distance_parallel.py /path/to/sa.conf"""
     if len(sys.argv) != 2:
         print('Usage: est_distance_spark.py /path/to/sa.conf')
         sys.exit(1)
@@ -64,10 +64,11 @@ if __name__ == "__main__":
         parallax_ = record[1]
         parallax_error_ = record[2]
         d = BayesianDistance(iden, parallax_, parallax_error_, p, distance_range, 4)
+        d.get_distance_posterior()
         d.get_result()
         insert.execute(
             'INSERT INTO gaia_distance (gaia_source_id, moment, distance, distance_lower, distance_upper) VALUES (%s, %s, %s, %s, %s);',
-            (record[0], float(d[1]), float(d[2]), float(d[3]), float(d[4])))
+            (iden, float(d.moment), float(d.distance), float(d.distance_lower), float(d.distance_upper)))
         count = count + 1
         if count >= 1000:
             conn_.commit()
