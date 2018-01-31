@@ -1,7 +1,7 @@
 import timeit
 from multiprocessing import Pool
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import norm
 
@@ -83,18 +83,18 @@ class BayesianDistance(object):
         return (self.gaia_source_id, self.moment, self.distance, self.distance_lower, self.distance_upper)
 
 
-    def display_distance_distribution(self):
-        fig = plt.figure(figsize=(12, 12))
-        ax1 = fig.add_subplot(211)
-        ax1.set_title('parallax {:.4f}, fraction: {:.2f}'.format(self.parallax, self.parallax_error / self.parallax))
-        ax1.set_xlabel('distance (kpc)')
-        ax1.set_ylabel('probability')
-        ax1.set_xlim(self.__dist_prob['dist'][0], self.__dist_prob['dist'][-1])
-        ax1.plot(self.__dist_prob['dist'], self.__dist_prob['prob'])
-
-        ax2 = fig.add_subplot(212)
-        ax2.set_xlabel('distance (kpc)')
-        ax2.set_ylabel('percentile')
-        ax2.set_xlim(self.__dist_prob['dist'][0], self.__dist_prob['dist'][-1])
-        ax2.plot(self.__dist_prob['dist'], self.normalise())
-        plt.show()
+    # def display_distance_distribution(self):
+    #     fig = plt.figure(figsize=(12, 12))
+    #     ax1 = fig.add_subplot(211)
+    #     ax1.set_title('parallax {:.4f}, fraction: {:.2f}'.format(self.parallax, self.parallax_error / self.parallax))
+    #     ax1.set_xlabel('distance (kpc)')
+    #     ax1.set_ylabel('probability')
+    #     ax1.set_xlim(self.__dist_prob['dist'][0], self.__dist_prob['dist'][-1])
+    #     ax1.plot(self.__dist_prob['dist'], self.__dist_prob['prob'])
+    #
+    #     ax2 = fig.add_subplot(212)
+    #     ax2.set_xlabel('distance (kpc)')
+    #     ax2.set_ylabel('percentile')
+    #     ax2.set_xlim(self.__dist_prob['dist'][0], self.__dist_prob['dist'][-1])
+    #     ax2.plot(self.__dist_prob['dist'], self.normalise())
+    #     plt.show()
