@@ -22,8 +22,8 @@ query = 'SELECT g.source_id, g.l, g.b, g.ra, g.dec, g.pmra, g.pmdec, g.parallax,
         'WHERE g.pmra IS NOT null AND g.pmdec IS NOT null AND g.parallax_error/g.parallax < 0.2'
 
 
-def db_connect(url_string):
-    return psycopg2.connect(url_string)
+def db_connect(host, port, db_name, user, password):
+    return psycopg2.connect(host=host, port=port, dbname=db_name, user=user, password=password)
 
 
 def db_create_table(connection):
@@ -105,16 +105,15 @@ if __name__ == '__main__':
     config.read(conf)
 
     HOST = config.get('database', 'host')
+    PORT = config.get('database', 'port')
+    DB = config.get('database', 'dbname')
     USER = config.get('database', 'user')
     PWORD = config.get('database', 'password')
-    PORT = config.get('database', 'port')
-    DBNAME = config.get('database', 'db')
-    OUTPUT = config.get('data', 'output.votable')
-    url = 'postgresql://{0}:{1}@{2}:{3}/{4}'.format(USER, PWORD, HOST, PORT, DBNAME)
 
-    conn = db_connect(url)
+    conn = db_connect(HOST, PORT, DB, USER, PWORD)
     job = Gaia.launch_job_async(query, output_file=OUTPUT, dump_to_file=True)
     job_result = job.get_results()
     # using constraint in VizieR, http://vizier.cfa.harvard.edu/vizier/vizHelp/cst.htx#char
     db_create_table(conn)
     process(conn, job_result)
+    conn.close()

@@ -11,8 +11,8 @@ main_table = 'gaia_ucac4_colour'
 distance_table = 'gaia_distance'
 
 
-def db_connect(url_string):
-    return psycopg2.connect(url_string)
+def db_connect(host, port, db_name, user, password):
+    return psycopg2.connect(host=host, port=port, dbname=db_name, user=user, password=password)
 
 
 def db_create_table(conn):
@@ -39,20 +39,17 @@ if __name__ == "__main__":
     config.read(conf)
 
     HOST = config.get('database', 'host')
+    PORT = config.get('database', 'port')
+    DB = config.get('database', 'dbname')
     USER = config.get('database', 'user')
     PWORD = config.get('database', 'password')
-    PORT = config.get('database', 'port')
-    DBNAME = config.get('database', 'db')
-    TODB = bool(config.get('database', 'isUsed'))
-
-    url = 'postgresql://{0}:{1}@{2}:{3}/{4}'.format(USER, PWORD, HOST, PORT, DBNAME)
 
     distance_range = np.arange(0.01, 20.0, 0.01)
     pri = Prior()
     pri.set_r_lim(10.0)
     p = pri.proper_uniform
 
-    conn_ = db_connect(url)
+    conn_ = db_connect(HOST, PORT, DB, USER, PWORD)
     db_create_table(conn_)
     cur = conn_.cursor()
     cur.execute('SELECT gaia_source_id, parallax, parallax_error FROM gaia_ucac4_colour WHERE parallax > 0;')
@@ -74,3 +71,4 @@ if __name__ == "__main__":
             conn_.commit()
             count = 0
     conn_.commit()
+    conn_.close()
