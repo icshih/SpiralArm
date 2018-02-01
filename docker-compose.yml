@@ -1,0 +1,14 @@
+version: "3"
+services:
+  db:
+      image: postgres:9.6
+      ports:
+        - 9000:5432
+  app:
+    build: .
+    deploy:
+      restart_policy:
+        delay: 3s
+        max_attempts: 5
+    depends_on:
+      - db
