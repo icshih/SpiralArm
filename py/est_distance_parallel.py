@@ -25,6 +25,10 @@ def db_create_table(conn):
                    'distance_upper real);')
     conn.commit()
 
+def get_record(record):
+    d = BayesianDistance(record[0], record[1], record[2], p, distance_range, 4)
+    d.get_distance_posterior()
+    d.get_result()
 
 if __name__ == "__main__":
     """# bash>PYTHONPATH=/Users/icshih/Documents/Research/SpiralArm/py/lib python3 est_distance_parallel.py /path/to/sa.conf"""
