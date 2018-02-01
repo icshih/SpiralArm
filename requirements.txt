@@ -1,4 +1,5 @@
 numpy
 scipy
 pandas
+psycopg2
 pyspark==2.2.1
