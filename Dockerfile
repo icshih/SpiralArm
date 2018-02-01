@@ -1,6 +1,6 @@
 FROM python:3
 
-RUN apt-get update && apt-get install -y git
+RUN apt-get update && apt-get install -y git && apt-get install -y vim
 RUN mkdir /app
 WORKDIR /app
 ADD requirements.txt /app/
