@@ -7,4 +7,4 @@ ADD requirements.txt /app/
 RUN pip install -r requirements.txt
 RUN rm requirements.txt
 RUN git clone https://github.com/icshih/SpiralArm.git
-CMD ["/bin/bash"]
+CMD ["python3", "SpiralArm/py/test_db_connect.py", "SpiralArm/conf/test.conf"]
