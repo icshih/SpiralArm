@@ -109,6 +109,7 @@ if __name__ == '__main__':
     DB = config.get('database', 'dbname')
     USER = config.get('database', 'user')
     PWORD = config.get('database', 'password')
+    OUTPUT = config.get('data', 'output.votable')
 
     conn = db_connect(HOST, PORT, DB, USER, PWORD)
     job = Gaia.launch_job_async(query, output_file=OUTPUT, dump_to_file=True)
