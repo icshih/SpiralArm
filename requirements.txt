@@ -1,0 +1,4 @@
+numpy
+scipy
+pandas
+pyspark==2.2.1
