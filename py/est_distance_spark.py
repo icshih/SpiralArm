@@ -5,10 +5,11 @@ import sys
 
 import numpy as np
 # sys.path.append('/Users/icshih/Documents/Research/SpiralArm/py/lib')
-from para2dis.distance.BayesianDistance import BayesianDistance
-from para2dis.distance.Prior import Prior
+from para2dis.BayesianDistance import BayesianDistance
+from para2dis.Prior import Prior
 from pyspark.sql import Row
 from pyspark.sql import SparkSession
+
 
 if __name__ == "__main__":
     """Submit Spark job:
