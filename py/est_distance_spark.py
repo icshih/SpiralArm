@@ -3,7 +3,6 @@ import os
 import re
 import sys
 
-import boto3
 import numpy as np
 # sys.path.append('/Users/icshih/Documents/Research/SpiralArm/py/lib')
 from para2dis.distance.BayesianDistance import BayesianDistance
@@ -45,11 +44,13 @@ if __name__ == "__main__":
     DRIVER = config.get('database', 'driver')
     URL = config.get('database', 'url')
     USER = config.get('database', 'user')
-    TODB = config.get('database', 'isUsed')
+    PASSWORD = config.get('database', 'password')
+    TODB = bool(config.get('database', 'isUsed'))
 
     prop = {
         'driver': DRIVER,
-        'user': USER
+        'user': USER,
+        'password': PASSWORD
     }
 
     df = spark.read.jdbc(URL, main_table, properties=prop)
@@ -70,14 +71,14 @@ if __name__ == "__main__":
                            distance_upper=float(b[4])))
 
     # Write to database or parquet? Depending on the host
-    if re.search('compute.amazonaws.com', os.environ['HOST']) and TODB is False:
+    if re.search('ip-', os.environ['HOSTNAME']) and TODB is False:
         S3 = config.get('data', 'output.s3bucket')
         OUTPUT = config.get('data', 'output.parquet')
-        # spark.createDataFrame(out).write.mode('overwrite').parquet('s3://' + S3 + '/data/' + OUTPUT, compression='snappy')
-        spark.createDataFrame(out).write.mode('overwrite').parquet(OUTPUT, compression='snappy')
-        s3 = boto3.resource('s3')
-        with open(OUTPUT, 'rb') as p:
-            s3.Bucket(S3).put_object(Key='data/' + OUTPUT, Body=p)
+        spark.createDataFrame(out).write.mode('overwrite').parquet('s3://' + S3 + '/data/' + OUTPUT, compression='snappy')
+        #spark.createDataFrame(out).write.mode('overwrite').parquet(OUTPUT, compression='snappy')
+        # s3 = boto3.resource('s3')
+        # with open(OUTPUT, 'rb') as p:
+        #     s3.Bucket(S3).put_object(Key='data/' + OUTPUT, Body=p)
     else:
         spark.createDataFrame(out).repartition(10).write.mode('append').jdbc(URL, distance_table, properties=prop)
 
