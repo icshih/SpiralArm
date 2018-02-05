@@ -12,7 +12,15 @@ from pyspark.sql import Row
 from pyspark.sql import SparkSession
 
 if __name__ == "__main__":
-    """# bash>PYTHONPATH=/Users/icshih/Documents/Research/SpiralArm/py/lib python3 est_distance_spark.py /path/to/sa.conf"""
+    """Submit Spark job:
+    1. Using spark-submit:
+       PYTHONPATH=/Users/icshih/Documents/Research/SpiralArm/py/lib spark-submit --master local[4] \
+       --conf spark.driver.extraClassPath=resources/postgresql-42.1.4.jar \
+       --conf spark.network.timeout=10000 \
+       py/est_distance_spark.py conf/sa.conf
+    2. Self-contained:
+    #  PYTHONPATH=/Users/icshih/Documents/Research/SpiralArm/py/lib python3 est_distance_spark.py /path/to/sa.conf
+    """
     if len(sys.argv) != 2:
         print('Usage: est_distance_spark.py /path/to/sa.conf')
         sys.exit(1)
@@ -26,10 +34,10 @@ if __name__ == "__main__":
 
     spark = SparkSession.Builder() \
         .appName('distance') \
-        .master('local[4]') \
-        .config('spark.driver.extraClassPath', 'resources/postgresql-42.1.4.jar') \
-        .config('spark.network.timeout', '800') \
         .getOrCreate()
+        # .master("local[4]") \
+        # .config('spark.driver.extraClassPath', 'resources/postgresql-42.1.4.jar') \
+        # .config('spark.network.timeout', '10000') \
 
     config = configparser.ConfigParser()
     config.read(conf)
