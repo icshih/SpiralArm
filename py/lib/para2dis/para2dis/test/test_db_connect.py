@@ -9,7 +9,7 @@ def db_connect(host, port, db_name, user, password):
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print('Usage: test_db_connect.py /path/to/sa.conf')
+        print('Usage: test_db_connect.py /path/to/test.conf')
         sys.exit(1)
     else:
         # We use a property file to configure the environment

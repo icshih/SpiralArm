@@ -1,8 +1,9 @@
 import timeit
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
 from multiprocessing import Pool
+
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.stats import norm
 
 
 def find_nearest(array, value):

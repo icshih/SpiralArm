@@ -95,7 +95,7 @@ def process(connection, dataset):
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print('Usage: sa_cross_match.py /path/to/sa.conf')
+        print('Usage: sa_cross_match.py /path/to/local.conf')
         sys.exit(1)
     else:
         # We use a property file to configure the environment
