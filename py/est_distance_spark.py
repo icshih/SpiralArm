@@ -15,12 +15,12 @@ if __name__ == "__main__":
        spark-submit --master local[*] \
        --jars resources/postgresql-42.1.4.jar \
        --py-files py/lib/para2dis/dist/para2dis-0.1.tar.gz \
-       py/est_distance_spark.py conf/sa.conf
+       py/est_distance_spark.py conf/local.conf
     2. Self-contained:
-    #  PYTHONPATH=/Users/icshih/Documents/Research/SpiralArm/py/lib python3 est_distance_spark.py /path/to/sa.conf
+    #  PYTHONPATH=/Users/icshih/Documents/Research/SpiralArm/py/lib python3 est_distance_spark.py /path/to/local.conf
     """
     if len(sys.argv) != 2:
-        print('Usage: est_distance_spark.py /path/to/sa.conf')
+        print('Usage: est_distance_spark.py /path/to/local.conf')
         sys.exit(1)
     else:
         # We use a property file to configure the environment

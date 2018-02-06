@@ -31,9 +31,9 @@ def get_record(record):
     d.get_result()
 
 if __name__ == "__main__":
-    """# bash>PYTHONPATH=/Users/icshih/Documents/Research/SpiralArm/py/lib python3 est_distance_parallel.py /path/to/sa.conf"""
+    """# bash>PYTHONPATH=/Users/icshih/Documents/Research/SpiralArm/py/lib python3 est_distance_parallel.py /path/to/local.conf"""
     if len(sys.argv) != 2:
-        print('Usage: est_distance_spark.py /path/to/sa.conf')
+        print('Usage: est_distance_spark.py /path/to/local.conf')
         sys.exit(1)
     else:
         # We use a property file to configure the environment
