@@ -4,7 +4,6 @@ import re
 import sys
 
 import numpy as np
-# sys.path.append('/Users/icshih/Documents/Research/SpiralArm/py/lib')
 from para2dis.BayesianDistance import BayesianDistance
 from para2dis.Prior import Prior
 from pyspark.sql import Row
@@ -13,9 +12,9 @@ from pyspark.sql import SparkSession
 if __name__ == "__main__":
     """Submit Spark job:
     1. Using spark-submit:
-       PYTHONPATH=/Users/icshih/Documents/Research/SpiralArm/py/lib spark-submit --master local[4] \
-       --conf spark.driver.extraClassPath=resources/postgresql-42.1.4.jar \
-       --conf spark.network.timeout=10000 \
+       spark-submit --master local[*] \
+       --jars resources/postgresql-42.1.4.jar \
+       --py-files py/lib/para2dis/dist/para2dis-0.1.tar.gz \
        py/est_distance_spark.py conf/sa.conf
     2. Self-contained:
     #  PYTHONPATH=/Users/icshih/Documents/Research/SpiralArm/py/lib python3 est_distance_spark.py /path/to/sa.conf
@@ -33,10 +32,6 @@ if __name__ == "__main__":
 
     spark = SparkSession.Builder() \
         .appName('distance') \
-        .getOrCreate()
-        # .master("local[4]") \
-        # .config('spark.driver.extraClassPath', 'resources/postgresql-42.1.4.jar') \
-        # .config('spark.network.timeout', '10000') \
 
     config = configparser.ConfigParser()
     config.read(conf)
@@ -74,8 +69,9 @@ if __name__ == "__main__":
     if re.search('ip-', os.environ['HOSTNAME']) and TODB is False:
         S3 = config.get('data', 'output.s3bucket')
         OUTPUT = config.get('data', 'output.parquet')
-        spark.createDataFrame(out).write.mode('overwrite').parquet('s3://' + S3 + '/data/' + OUTPUT, compression='snappy')
-        #spark.createDataFrame(out).write.mode('overwrite').parquet(OUTPUT, compression='snappy')
+        spark.createDataFrame(out).write.mode('overwrite').parquet('s3://' + S3 + '/data/' + OUTPUT,
+                                                                   compression='snappy')
+        # spark.createDataFrame(out).write.mode('overwrite').parquet(OUTPUT, compression='snappy')
         # s3 = boto3.resource('s3')
         # with open(OUTPUT, 'rb') as p:
         #     s3.Bucket(S3).put_object(Key='data/' + OUTPUT, Body=p)
