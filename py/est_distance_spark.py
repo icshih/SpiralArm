@@ -30,8 +30,7 @@ if __name__ == "__main__":
     main_table = 'gaia_ucac4_colour'
     distance_table = 'gaia_distance_spark'
 
-    spark = SparkSession.Builder() \
-        .appName('distance') \
+    spark = SparkSession.Builder().appName('distance').getOrCreate()
 
     config = configparser.ConfigParser()
     config.read(conf)
