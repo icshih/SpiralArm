@@ -1,8 +1,7 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='para2dis',
-    packages=['para2dis'],
     version='0.1',
     author='I-Chun SHIH',
     author_email='icshih@mac.com',
@@ -12,5 +11,6 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3'
     ],
-    description='Measured parallax to distance distribution'
+    description='Measured parallax to distance distribution',
+    packages=['para2dis']
 )
