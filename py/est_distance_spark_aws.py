@@ -54,7 +54,7 @@ if __name__ == "__main__":
     URL = config.get('database', 'url')
     USER = config.get('database', 'user')
     PASSWORD = config.get('database', 'password')
-    TODB = bool(config.get('database', 'isUsed'))
+    TODB = config.get('database', 'isUsed')
 
     prop = {
         'driver': DRIVER,
@@ -80,7 +80,7 @@ if __name__ == "__main__":
                            distance_upper=float(b[4])))
 
     # Write to database or parquet? Depending on the host
-    if TODB is False:
+    if TODB.upper() is 'TRUE':
         S3_BUCKET = config.get('data', 'output.s3bucket')
         OUTPUT = config.get('data', 'output.parquet')
         spark.createDataFrame(out).write.mode('overwrite').parquet('s3://' + S3_BUCKET + '/data/' + OUTPUT,

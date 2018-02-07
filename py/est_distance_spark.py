@@ -34,8 +34,7 @@ if __name__ == "__main__":
     URL = config.get('database', 'url')
     USER = config.get('database', 'user')
     PASSWORD = config.get('database', 'password')
-    # TODB = bool(config.get('database', 'isUsed'))
-    TODB = False
+    TODB = config.get('database', 'isUsed')
 
     prop = {
         'driver': DRIVER,
@@ -59,7 +58,7 @@ if __name__ == "__main__":
                            distance_upper=float(b[4])))
 
     # Write to database or parquet? Depending on the host
-    if TODB is True:
+    if TODB.upper() is 'TRUE':
         spark.createDataFrame(out).repartition(10).write.mode('append').jdbc(URL, distance_table, properties=prop)
     else:
         OUTPUT = config.get('data', 'output.parquet')
