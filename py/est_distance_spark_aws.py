@@ -81,11 +81,11 @@ if __name__ == "__main__":
 
     # Write to database or parquet? Depending on the host
     if TODB.upper() is 'TRUE':
+        spark.createDataFrame(out).repartition(10).write.mode('append').jdbc(URL, distance_table, properties=prop)
+    else:
         S3_BUCKET = config.get('data', 'output.s3bucket')
         OUTPUT = config.get('data', 'output.parquet')
         spark.createDataFrame(out).write.mode('overwrite').parquet('s3://' + S3_BUCKET + '/data/' + OUTPUT,
                                                                    compression='snappy')
-    else:
-        spark.createDataFrame(out).repartition(10).write.mode('append').jdbc(URL, distance_table, properties=prop)
 
     spark.stop()
