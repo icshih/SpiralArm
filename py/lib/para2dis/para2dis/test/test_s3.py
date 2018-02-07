@@ -2,8 +2,10 @@ import boto3
 import botocore
 
 BUCKET_NAME = 'aws-logs-823959199013-eu-west-3'
-KEY = 'rds.conf'
+KEY = 'program/rds.conf'
 LOCAL_FILE = 'temp.conf'
+
+local_file = open(LOCAL_FILE, 'w+')
 
 s3 = boto3.resource('s3')
 
