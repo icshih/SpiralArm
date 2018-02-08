@@ -1,4 +1,3 @@
-import timeit
 from multiprocessing import Pool
 
 # import matplotlib.pyplot as plt
@@ -42,15 +41,25 @@ class BayesianDistance(object):
         else:
             return self.prior(distances) * self.likelihood(distances)
 
-    def get_distance_posterior(self):
-        dist_prob = np.zeros(self.distance_range.size, dtype={'names': ['dist', 'prob'], 'formats': ['f4', 'f8']})
-        start = timeit.default_timer()
+    def sequence(self, distance_range):
+        dist_prob = np.zeros(distance_range.size, dtype={'names': ['dist', 'prob'], 'formats': ['f4', 'f8']})
+        for i, d in enumerate(distance_range):
+            dist_prob[i] = (d, self.multi_prior_likelihood(d))
+        return dist_prob
+
+    def parallel(self, distance_range):
+        dist_prob = np.zeros(distance_range.size, dtype={'names': ['dist', 'prob'], 'formats': ['f4', 'f8']})
         with Pool(self.pool_size) as P:
             p_list = P.map(self.multi_prior_likelihood, self.distance_range)
-        stop = timeit.default_timer()
         for i, d in enumerate(self.distance_range):
             dist_prob[i] = (d, p_list[i])
-        print('cal. time: {:.2f} sec.'.format(stop - start))
+        return dist_prob
+
+    def get_distance_posterior(self):
+        if self.pool_size == 1:
+            dist_prob = self.sequence(self.distance_range)
+        else:
+            dist_prob = self.parallel(self.distance_range)
         self.__dist_prob = dist_prob
 
     def get_distance_cum(self):

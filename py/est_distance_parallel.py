@@ -1,11 +1,12 @@
 import configparser
+import multiprocessing
+import os
 import sys
 
 import numpy as np
 import psycopg2
-# sys.path.append('py/lib/para2dis/distance')
-from para2dis.distance.BayesianDistance import BayesianDistance
-from para2dis.distance.Prior import Prior
+from para2dis.BayesianDistance import BayesianDistance
+from para2dis.Prior import Prior
 
 main_table = 'gaia_ucac4_colour'
 distance_table = 'gaia_distance'
@@ -25,10 +26,16 @@ def db_create_table(conn):
                    'distance_upper real);')
     conn.commit()
 
-def get_record(record):
-    d = BayesianDistance(record[0], record[1], record[2], p, distance_range, 4)
-    d.get_distance_posterior()
-    d.get_result()
+def worker(id, parallax, parallax_error, p, distance_range):
+    print('{0} processes {1}'.format(os.getpid(), id))
+    bd = BayesianDistance(id, parallax, parallax_error, p, distance_range, 1)
+    bd.get_distance_posterior()
+    return bd.get_result()
+
+def worker2(record):
+    bd = BayesianDistance(record[0], record[1], record[2], p, distance_range, 1)
+    print('{0} processes {1}'.format(os.getpid(), record[0]))
+    return bd.calculate()
 
 if __name__ == "__main__":
     """# bash>PYTHONPATH=/Users/icshih/Documents/Research/SpiralArm/py/lib python3 est_distance_parallel.py /path/to/local.conf"""
@@ -48,7 +55,7 @@ if __name__ == "__main__":
     USER = config.get('database', 'user')
     PWORD = config.get('database', 'password')
 
-    distance_range = np.arange(0.01, 20.0, 0.01)
+    distance_range = np.arange(0.01, 10.0, 0.01)
     pri = Prior()
     pri.set_r_lim(10.0)
     p = pri.proper_uniform
@@ -58,21 +65,19 @@ if __name__ == "__main__":
     cur = conn_.cursor()
     cur.execute('SELECT gaia_source_id, parallax, parallax_error FROM gaia_ucac4_colour WHERE parallax > 0;')
 
+    with multiprocessing.Pool(os.cpu_count()) as pool:
+        jobs = pool.map(worker2, cur.fetchall())
+
     insert = conn_.cursor()
     count = 0
-    for record in cur:
-        iden = record[0]
-        parallax_ = record[1]
-        parallax_error_ = record[2]
-        d = BayesianDistance(iden, parallax_, parallax_error_, p, distance_range, 4)
-        d.get_distance_posterior()
-        d.get_result()
+    for j in jobs:
         insert.execute(
-            'INSERT INTO gaia_distance (gaia_source_id, moment, distance, distance_lower, distance_upper) VALUES (%s, %s, %s, %s, %s);',
-            (iden, float(d.moment), float(d.distance), float(d.distance_lower), float(d.distance_upper)))
-        count = count + 1
-        if count >= 1000:
-            conn_.commit()
-            count = 0
+        'INSERT INTO gaia_distance (gaia_source_id, moment, distance, distance_lower, distance_upper) VALUES (%s, %s, %s, %s, %s);',
+        (j[0], float(j[1]), float(j[2]), float(j[3]), float(j[4])))
+    count = count + 1
+    if count >= 10000:
+        print('insert data...')
+        conn_.commit()
+        count = 0
     conn_.commit()
     conn_.close()
