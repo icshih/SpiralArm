@@ -80,7 +80,7 @@ if __name__ == "__main__":
     conn_ = db_connect(HOST, PORT, DB, USER, PWORD)
     db_create_table(conn_)
     cur = conn_.cursor()
-    cur.execute('SELECT gaia_source_id, parallax, parallax_error FROM gaia_ucac4_colour WHERE parallax > 0 LIMIT 100;')
+    cur.execute('SELECT gaia_source_id, parallax, parallax_error FROM gaia_ucac4_colour WHERE parallax > 0;')
 
     q = multiprocessing.Queue(os.cpu_count() + 10)
     r = multiprocessing.Process(target=worker_b, args=(q, conn_))
