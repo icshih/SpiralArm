@@ -1,6 +1,5 @@
-import configparser
+# import configparser
 import os
-import re
 import sys
 
 import numpy as np
@@ -19,12 +18,17 @@ if __name__ == "__main__":
     2. Self-contained:
     #  PYTHONPATH=/Users/icshih/Documents/Research/SpiralArm/py/lib python3 est_distance_spark.py /path/to/local.conf
     """
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 6:
         print('Usage: est_distance_spark.py /path/to/local.conf')
         sys.exit(1)
     else:
         # We use a property file to configure the environment
-        conf = sys.argv[1]
+        DRIVER = sys.argv[1]
+        URL = sys.argv[2]
+        USER = sys.argv[3]
+        PASSWORD = sys.argv[4]
+        S3 = sys.argv[5]
+
 
     os.environ['PYSPARK_PYTHON'] = 'python3'
     main_table = 'gaia_ucac4_colour'
@@ -32,14 +36,17 @@ if __name__ == "__main__":
 
     spark = SparkSession.Builder().appName('distance').getOrCreate()
 
-    config = configparser.ConfigParser()
-    config.read(conf)
+    # config = configparser.ConfigParser()
+    # config.read(conf)
 
-    DRIVER = config.get('database', 'driver')
-    URL = config.get('database', 'url')
-    USER = config.get('database', 'user')
-    PASSWORD = config.get('database', 'password')
-    TODB = bool(config.get('database', 'isUsed'))
+    # DRIVER = config.get('database', 'driver')
+    # URL = config.get('database', 'url')
+    # USER = config.get('database', 'user')
+    # PASSWORD = config.get('database', 'password')
+    # TODB = bool(config.get('database', 'isUsed'))
+
+    TODB = True
+
 
     prop = {
         'driver': DRIVER,
@@ -65,9 +72,10 @@ if __name__ == "__main__":
                            distance_upper=float(b[4])))
 
     # Write to database or parquet? Depending on the host
-    if re.search('ip-', os.environ['HOSTNAME']) and TODB is False:
-        S3 = config.get('data', 'output.s3bucket')
-        OUTPUT = config.get('data', 'output.parquet')
+    if TODB is False:
+        # S3 = config.get('data', 'output.s3bucket')
+        # OUTPUT = config.get('data', 'output.parquet')
+        OUTPUT = 'test.parquet'
         spark.createDataFrame(out).write.mode('overwrite').parquet('s3://' + S3 + '/data/' + OUTPUT,
                                                                    compression='snappy')
         # spark.createDataFrame(out).write.mode('overwrite').parquet(OUTPUT, compression='snappy')
