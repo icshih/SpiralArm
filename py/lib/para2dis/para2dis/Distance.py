@@ -40,7 +40,7 @@ class Distance(object):
 
     def get_distance_cum(self):
         cum_prob = np.empty(self.__dist_prob.size)
-        cum = 0;
+        cum = 0
         for j, p in enumerate(self.__dist_prob['prob']):
             cum = cum + p
             cum_prob[j] = cum

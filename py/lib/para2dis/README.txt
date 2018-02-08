@@ -1,1 +1,1 @@
-Calculate distance from measured parallax
+Parallax to distance statistics
