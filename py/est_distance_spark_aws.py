@@ -1,6 +1,5 @@
 import configparser
 import sys
-import os
 
 import boto3
 import botocore
@@ -71,7 +70,7 @@ if __name__ == "__main__":
     pri.set_r_lim(10.0)
     p = pri.proper_uniform
 
-    ds = spark.sql('SELECT gaia_source_id, parallax, parallax_error FROM gaia_ucac4_colour WHERE parallax > 0')
+    ds = spark.sql('SELECT gaia_source_id, parallax, parallax_error FROM gaia_ucac4_colour WHERE parallax > 0 LIMIT 10000')
 
     out = ds.rdd \
         .map(lambda d: BayesianDistance(d.gaia_source_id, d.parallax, d.parallax_error, p, distance_range, 4)) \
