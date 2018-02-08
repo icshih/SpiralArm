@@ -26,16 +26,12 @@ def db_create_table(conn):
                    'distance_upper real);')
     conn.commit()
 
-def worker(id, parallax, parallax_error, p, distance_range):
-    print('{0} processes {1}'.format(os.getpid(), id))
-    bd = BayesianDistance(id, parallax, parallax_error, p, distance_range, 1)
-    bd.get_distance_posterior()
-    return bd.get_result()
 
-def worker2(record):
+def worker(record):
     bd = BayesianDistance(record[0], record[1], record[2], p, distance_range, 1)
     print('{0} processes {1}'.format(os.getpid(), record[0]))
     return bd.calculate()
+
 
 if __name__ == "__main__":
     """# bash>PYTHONPATH=/Users/icshih/Documents/Research/SpiralArm/py/lib python3 est_distance_parallel.py /path/to/local.conf"""
@@ -66,14 +62,14 @@ if __name__ == "__main__":
     cur.execute('SELECT gaia_source_id, parallax, parallax_error FROM gaia_ucac4_colour WHERE parallax > 0;')
 
     with multiprocessing.Pool(os.cpu_count()) as pool:
-        jobs = pool.map(worker2, cur.fetchall())
+        jobs = pool.map(worker, cur.fetchall())
 
     insert = conn_.cursor()
     count = 0
     for j in jobs:
         insert.execute(
-        'INSERT INTO gaia_distance (gaia_source_id, moment, distance, distance_lower, distance_upper) VALUES (%s, %s, %s, %s, %s);',
-        (j[0], float(j[1]), float(j[2]), float(j[3]), float(j[4])))
+            'INSERT INTO gaia_distance (gaia_source_id, moment, distance, distance_lower, distance_upper) VALUES (%s, %s, %s, %s, %s);',
+            (j[0], float(j[1]), float(j[2]), float(j[3]), float(j[4])))
     count = count + 1
     if count >= 10000:
         print('insert data...')
