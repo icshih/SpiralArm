@@ -18,12 +18,12 @@ def db_connect(host, port, db_name, user, password):
 
 def db_create_table(conn):
     create = conn.cursor()
-    create.execute('CREATE TABLE IF NOT EXISTS gaia_distance ('
+    create.execute('CREATE TABLE IF NOT EXISTS {0} ('
                    'gaia_source_id bigint NOT NULL,'
                    'moment real,'
                    'distance real,'
                    'distance_lower real,'
-                   'distance_upper real);')
+                   'distance_upper real);'.format(distance_table))
     conn.commit()
 
 
@@ -59,7 +59,8 @@ if __name__ == "__main__":
     conn_ = db_connect(HOST, PORT, DB, USER, PWORD)
     db_create_table(conn_)
     cur = conn_.cursor()
-    cur.execute('SELECT gaia_source_id, parallax, parallax_error FROM gaia_ucac4_colour WHERE parallax > 0;')
+    cur.execute('SELECT gaia_source_id, parallax, parallax_error '
+                'FROM {} WHERE parallax > 0;'.format(main_table))
 
     with multiprocessing.Pool(os.cpu_count()) as pool:
         jobs = pool.map(worker, cur.fetchall())
@@ -68,7 +69,8 @@ if __name__ == "__main__":
     count = 0
     for j in jobs:
         insert.execute(
-            'INSERT INTO gaia_distance (gaia_source_id, moment, distance, distance_lower, distance_upper) VALUES (%s, %s, %s, %s, %s);',
+            'INSERT INTO {} (gaia_source_id, moment, distance, distance_lower, distance_upper)'
+            ' VALUES (%s, %s, %s, %s, %s);'.format(distance_table),
             (j[0], float(j[1]), float(j[2]), float(j[3]), float(j[4])))
     count = count + 1
     if count >= 10000:
