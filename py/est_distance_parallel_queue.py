@@ -9,7 +9,7 @@ from para2dis.BayesianDistance import BayesianDistance
 from para2dis.Prior import Prior
 
 main_table = 'gaia_ucac4_colour'
-distance_table = 'gaia_distance'
+distance_table = 'gaia_distance_uniform'
 
 
 def db_connect(host, port, db_name, user, password):
@@ -18,12 +18,12 @@ def db_connect(host, port, db_name, user, password):
 
 def db_create_table(conn):
     create = conn.cursor()
-    create.execute('CREATE TABLE IF NOT EXISTS gaia_distance ('
+    create.execute('CREATE TABLE IF NOT EXISTS {0} ('
                    'gaia_source_id bigint NOT NULL,'
                    'moment real,'
                    'distance real,'
                    'distance_lower real,'
-                   'distance_upper real);')
+                   'distance_upper real);'.format(distance_table))
     conn.commit()
 
 
@@ -42,7 +42,8 @@ def worker_b(queue, connection):
             j = queue.get(timeout=30)
             print('Process {0} inserts {1}'.format(os.getpid(), j[0]))
             insert.execute(
-                'INSERT INTO gaia_distance (gaia_source_id, moment, distance, distance_lower, distance_upper) VALUES (%s, %s, %s, %s, %s);',
+                'INSERT INTO {0} (gaia_source_id, moment, distance, distance_lower, distance_upper)'
+                ' VALUES (%s, %s, %s, %s, %s);'.format(distance_table),
                 (j[0], float(j[1]), float(j[2]), float(j[3]), float(j[4])))
             count = count + 1
             if count >= 1000:
@@ -52,11 +53,11 @@ def worker_b(queue, connection):
         except:
             print('Does the queue remain empty after 30 seconds? {}'.format(queue.empty()))
             not_complete = False
-    connection.commit()
 
 
 if __name__ == "__main__":
-    """# bash>PYTHONPATH=/Users/icshih/Documents/Research/SpiralArm/py/lib python3 est_distance_parallel.py /path/to/local.conf"""
+    """# bash>PYTHONPATH=/Users/icshih/Documents/Research/SpiralArm/py/lib 
+    python3 est_distance_parallel.py /path/to/local.conf"""
     if len(sys.argv) != 2:
         print('Usage: est_distance_parallel_queue.py /path/to/db.conf')
         sys.exit(1)
@@ -80,7 +81,8 @@ if __name__ == "__main__":
     conn_ = db_connect(HOST, PORT, DB, USER, PWORD)
     db_create_table(conn_)
     cur = conn_.cursor()
-    cur.execute('SELECT gaia_source_id, parallax, parallax_error FROM gaia_ucac4_colour WHERE parallax > 0;')
+    cur.execute('SELECT gaia_source_id, parallax, parallax_error '
+                'FROM {0} WHERE parallax > 0;'.format(main_table))
 
     q = multiprocessing.Queue(os.cpu_count() + 10)
     r = multiprocessing.Process(target=worker_b, args=(q, conn_))
@@ -88,4 +90,5 @@ if __name__ == "__main__":
     with multiprocessing.Pool(os.cpu_count()) as pool:
         pool.map(worker_a, cur.fetchall())
     r.join()
+    conn_.commit()
     conn_.close()
