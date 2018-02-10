@@ -1,4 +1,3 @@
-configparser
 numpy
 scipy
 astroquery

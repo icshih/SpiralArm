@@ -13,4 +13,4 @@ COPY ./py /app/py
 COPY ./resources /app/resources
 #RUN git clone https://github.com/icshih/SpiralArm.git
 #CMD ["python3", "py/test_db_connect.py", "conf/test.conf"]
-#CMD ["/bin/bash"]
+CMD ["python3", "py/est_distance_parallel_queue.py", "conf/local.conf"]

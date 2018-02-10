@@ -2,7 +2,7 @@ import configparser
 import multiprocessing
 import os
 import sys
-
+sys.path.append('py/lib/para2dis')
 import numpy as np
 import psycopg2
 from para2dis.BayesianDistance import BayesianDistance
@@ -25,6 +25,7 @@ def db_create_table(conn):
                    'distance_lower real,'
                    'distance_upper real);'.format(distance_table))
     conn.commit()
+    create.close()
 
 
 def worker_a(record):
@@ -53,6 +54,8 @@ def worker_b(queue, connection):
         except:
             print('Does the queue remain empty after 30 seconds? {}'.format(queue.empty()))
             not_complete = False
+    connection.commit()
+    insert.close()
 
 
 if __name__ == "__main__":
@@ -90,5 +93,5 @@ if __name__ == "__main__":
     with multiprocessing.Pool(os.cpu_count()) as pool:
         pool.map(worker_a, cur.fetchall())
     r.join()
-    conn_.commit()
+    cur.close()
     conn_.close()
