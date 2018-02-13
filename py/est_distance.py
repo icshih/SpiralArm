@@ -1,6 +1,8 @@
+import numpy as np
 import psycopg2
 from scipy.stats import norm
-import numpy as np
+
+
 # import numpy.ma as ma
 # import matplotlib.pyplot as plt
 
@@ -82,40 +84,5 @@ if __name__ == "__main__":
             conn_.commit()
             count = 0
     conn_.commit()
-
-
-
-# distance from 0 to 20 kpc
-# providing the parallax_error and for each distance r
-
-# mas
-# parallax = 2.3537642724378127
-# parallax_error = 0.07797686605256408
-# f = parallax_error/parallax
-# pc
-
-# dist_m = probability['dist']
-#
-# cum_prob = cumulate(probability['prob'])
-# ind_25 = find_nearest(cum_prob, 25.0)
-# ind_50 = find_nearest(cum_prob, 50.0)
-# ind_75 = find_nearest(cum_prob, 75.0)
-# print('distance: {:.3f} kpc [{:.3f},{:.3f}]'.format(dist_m[ind_50], dist_m[ind_25]-dist_m[ind_50], dist_m[ind_75]-dist_m[ind_50]));
-#
-# fig = plt.figure(figsize=(12, 12))
-# ax1 = fig.add_subplot(211)
-# ax1.set_title('parallax {:.4f}, fraction: {:.2f}'.format(parallax, f))
-# ax1.set_xlabel('distance (kpc)')
-# ax1.set_ylabel('probability')
-# ax1.set_xlim(dist_m[0], dist_m[-1])
-# ax1.plot(dist_m, probability['prob'])
-#
-# ax2 = fig.add_subplot(212)
-# ax2.set_xlabel('distance (kpc)')
-# ax2.set_ylabel('percentile')
-# ax2.set_xlim(dist_m[0], dist_m[-1])
-# ax2.plot(dist_m, cum_prob)
-# plt.show()
-
 
 

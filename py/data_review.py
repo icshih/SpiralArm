@@ -1,20 +1,23 @@
+import configparser
+import sys
+
+import astropy.coordinates as coord
 import astropy.units as u
 import matplotlib.pyplot as plt
-from matplotlib import cm
 import numpy as np
 import psycopg2
-import astropy.coordinates as coord
+from matplotlib import cm
+
+main_table = 'gaia_ucac4_colour'
+distance_table = 'gaia_distance_uniform'
+
+def db_connect(host, port, db_name, user, password):
+    return psycopg2.connect(host=host, port=port, dbname=db_name, user=user, password=password)
 
 
-def db_connect():
-    URI = 'postgresql://{}@{}:{}/{}'.format('postgres', 'localhost', '10000', 'postgres')
-    conn = psycopg2.connect(URI)
-    return conn
-
-
-def sky_distribution(conn):
-    cur = conn.cursor()
-    cur.execute('SELECT l, b FROM gaia_ucac4_colour WHERE b_mag != \'nan\' AND v_mag != \'nan\'')
+def sky_distribution(connection):
+    cur = connection.cursor()
+    cur.execute('SELECT l, b FROM {} WHERE b_mag != \'nan\' AND v_mag != \'nan\''.format(main_table))
     l = list()
     b = list()
     for record in cur:
@@ -33,8 +36,8 @@ def sky_distribution(conn):
     plt.savefig('sky_distribution.png')
 
 
-def data_distribution(conn):
-    cur = conn.cursor()
+def data_distribution(connection):
+    cur = connection.cursor()
     p = list()
     g = list()
     b = list()
@@ -92,8 +95,8 @@ def data_correlation(data):
     plt.show()
 
 
-def parallax_distribution(conn):
-    cur = conn.cursor()
+def parallax_distribution(connection):
+    cur = connection.cursor()
     p = list()
     g = list()
     pe = list()
@@ -118,7 +121,24 @@ def parallax_distribution(conn):
     # plt.show()
 
 
-conn_ = db_connect()
-sky_distribution(conn_)
-data_distribution(conn_)
-parallax_distribution(conn_)
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print('Usage: est_distance_parallel_queue.py /path/to/db.conf')
+        sys.exit(1)
+    else:
+        conf = sys.argv[1]
+
+    config = configparser.ConfigParser()
+    config.read(conf)
+
+    HOST = config.get('database', 'host')
+    PORT = config.get('database', 'port')
+    DB = config.get('database', 'dbname')
+    USER = config.get('database', 'user')
+    PWORD = config.get('database', 'password')
+
+    conn = db_connect(HOST, PORT, DB, USER, PWORD)
+    sky_distribution(conn)
+    data_distribution(conn)
+    parallax_distribution(conn)
+    conn.close()
