@@ -57,7 +57,7 @@ def selection(connection):
     ax1.set_title('Colour-magnitude diagram')
     ax1.set_xlabel('B-V')
     ax1.set_ylabel('M_v')
-    ax1.set_xlim(0.0, 2.0)
+    ax1.set_xlim(-1.0, 2.0)
     ax1.set_ylim(14, -2.0)
     ax1.scatter(colour, magnit, s=0.1, c='black', marker='.')
     plt.savefig('colour_magnitude.png')
