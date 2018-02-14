@@ -1,0 +1,8 @@
+SELECT g.source_id, g.l, g.b, g.ra, g.ra_error, g.dec, g.dec_error, g.pmra, g.pmra_error, g.pmdec, g.pmdec_error, g.parallax, g.parallax_error, g.phot_g_mean_mag, g.phot_g_mean_mag_error, u.ucac4_id
+FROM (
+    SELECT source_id, original_ext_source_id AS ucac4_id
+    FROM gaiadr1.ucac4_best_neighbour WHERE source_id IN (
+        SELECT source_id
+        FROM gaiadr1.gaia_source WHERE l < 17 OR l > 285 OR (l > 72 AND l < 222)) AND number_of_mates = 0) AS u
+    JOIN gaiadr1.gaia_source AS g ON (g.source_id = u.source_id)
+    WHERE g.pmra IS NOT null AND g.pmdec IS NOT null AND g.parallax_error/g.parallax < 0.2
