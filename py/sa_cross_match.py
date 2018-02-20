@@ -11,7 +11,7 @@ from astroquery.vizier import Vizier
 cross_match_table = 'gaia_ucac4'
 
 query = 'SELECT g.source_id, g.l, g.b, g.ra, g.ra_error, g.dec, g.dec_error, g.pmra, g.pmra_error,' \
-        ' g.pmdec, g.pmdec_error, g.parallax, g.parallax_error, g.phot_g_mean_mag, g.phot_g_mean_mag_error, u.ucac4_id ' \
+        ' g.pmdec, g.pmdec_error, g.parallax, g.parallax_error, g.phot_g_mean_mag, u.ucac4_id ' \
         'FROM (' \
         'SELECT source_id, original_ext_source_id AS ucac4_id ' \
         'FROM gaiadr1.ucac4_best_neighbour ' \
@@ -47,7 +47,6 @@ def db_create_table(connection):
                    'parallax double precision,'
                    'parallax_error double precision,'
                    'phot_g_mean_mag double precision,'
-                   'phot_g_mean_error double precision,'
                    'ucac4_id text NOT NULL,'
                    'b_mag float,'
                    'v_mag float);'.format(cross_match_table))
@@ -65,10 +64,10 @@ def get_and_ingest(connection, id_dict, constraint):
         g_tuple = id_dict[ucac4]
         insert.execute(
             'INSERT INTO gaia_ucac4_colour (gaia_source_id, l, b, ra, ra_error, dec, dec_error, pmra, pmra_error, '
-            'pmdec, pmdec_error, parallax, parallax_error, phot_g_mean_mag, phot_g_mean_error, ucac4_id, b_mag, v_mag) '
+            'pmdec, pmdec_error, parallax, parallax_error, phot_g_mean_mag, ucac4_id, b_mag, v_mag) '
             'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);',
             (g_tuple[0], g_tuple[1], g_tuple[2], g_tuple[3], g_tuple[4], g_tuple[5], g_tuple[6], g_tuple[7], g_tuple[8],
-             g_tuple[9], g_tuple[10], g_tuple[11], g_tuple[12], g_tuple[13], g_tuple[13], g_tuple[14], ucac4, bmag, vmag))
+             g_tuple[9], g_tuple[10], g_tuple[11], g_tuple[12], g_tuple[13], g_tuple[13], ucac4, bmag, vmag))
     connection.commit()
     insert.close()
 
@@ -94,8 +93,7 @@ def process(connection, dataset):
         parallax = f['parallax'].item(0)
         parallax_error = f['parallax_error'].item(0)
         gmag = f['phot_g_mean_mag'].item(0)
-        gmag_error = f['phot_g_mean_error'].item(0)
-        id_dict[u_id] = g_id, l, b, ra, ra_error, dec, dec_error, pmra, pmra_error, pmdec, pmdec_error, parallax, parallax_error, gmag, gmag_error
+        id_dict[u_id] = g_id, l, b, ra, ra_error, dec, dec_error, pmra, pmra_error, pmdec, pmdec_error, parallax, parallax_error, gmag
         constraint = constraint + ';' + u_id
         count = count + 1
         if count >= 500:
