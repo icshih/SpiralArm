@@ -65,7 +65,7 @@ def get_and_ingest(connection, id_dict, constraint):
         insert.execute(
             'INSERT INTO {0} (gaia_source_id, l, b, ra, ra_error, dec, dec_error, pmra, pmra_error, '
             'pmdec, pmdec_error, parallax, parallax_error, phot_g_mean_mag, ucac4_id, b_mag, v_mag) '
-            'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);'.format(cross_match_table),
+            'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);'.format(cross_match_table),
             (g_tuple[0], g_tuple[1], g_tuple[2], g_tuple[3], g_tuple[4], g_tuple[5], g_tuple[6], g_tuple[7], g_tuple[8],
              g_tuple[9], g_tuple[10], g_tuple[11], g_tuple[12], g_tuple[13], ucac4, bmag, vmag))
     connection.commit()
