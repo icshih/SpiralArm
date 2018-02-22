@@ -1,12 +1,14 @@
 package ics.astro.spiralarm.dm;
 
+import ics.astro.spiralarm.app.crossGaiaUcac4;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table( name = "GAIA_CROSS_UCAC4" )
-public class GaiaCrossUcac4 {
+@Table( name = crossGaiaUcac4.tableName )
+public class crossGaiaUcac4Dm {
 
     long sourceId;
     float l;
@@ -22,7 +24,6 @@ public class GaiaCrossUcac4 {
     double parallax;
     double parallaxError;
     double photGMeanMag;
-    double photGMeanMagError;
     double ucca4Id;
     double bMag;
     double vMag;
@@ -138,14 +139,6 @@ public class GaiaCrossUcac4 {
 
     public void setPhotGMeanMag(double photGMeanMag) {
         this.photGMeanMag = photGMeanMag;
-    }
-
-    public double getPhotGMeanMagError() {
-        return photGMeanMagError;
-    }
-
-    public void setPhotGMeanMagError(double photGMeanMagError) {
-        this.photGMeanMagError = photGMeanMagError;
     }
 
     public double getUcca4Id() {
