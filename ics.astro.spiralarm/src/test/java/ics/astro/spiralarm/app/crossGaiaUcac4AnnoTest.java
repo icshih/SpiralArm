@@ -59,7 +59,7 @@ public class crossGaiaUcac4AnnoTest {
         session.beginTransaction();
         List result = session.createQuery( String.format("from %s", crossGaiaUcac4.tableName) ).list();
         for ( crossGaiaUcac4Dm event : (List<crossGaiaUcac4Dm>) result ) {
-            System.out.println( "Data (" + event.getSourceId() + ") : " + event.getUcca4Id() );
+            System.out.println( "Data (" + event.getSourceId() + ") : " + event.getUcac4Id() );
         }
         session.getTransaction().commit();
         session.close();

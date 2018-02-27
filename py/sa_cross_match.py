@@ -124,22 +124,10 @@ def process_votable(connection, dataset):
     for d in dataset.array:
         f = ma.filled(d)
         u_id = re.sub('UCAC4-', '', f['ucac4_id'].decode(encoding='UTF-8'))
-        g_id = f['source_id']
-        l = f['l']
-        b = f['b']
-        ra = f['ra']
-        ra_error = f['ra_error']
-        dec = f['dec']
-        dec_error = f['dec_error']
-        pmra = f['pmra']
-        pmra_error = f['pmra_error']
-        pmdec = f['pmdec']
-        pmdec_error = f['pmdec_error']
-        parallax = f['parallax']
-        parallax_error = f['parallax_error']
-        gmag = f['phot_g_mean_mag']
         bmag, vmag = get_ucac4_b_v_mag(u_id)
-        id_dict[u_id] = g_id, l, b, ra, ra_error, dec, dec_error, pmra, pmra_error, pmdec, pmdec_error, parallax, parallax_error, gmag, bmag, vmag
+        id_dict[u_id] = f['source_id'], f['l'], f['b'], f['ra'], f['ra_error'], f['dec'], f['dec_error'], \
+                        f['pmra'], f['pmra_error'], f['pmdec'], f['pmdec_error'], f['parallax'], f['parallax_error'], \
+                        f['phot_g_mean_mag'], bmag, vmag
         count += 1
         if count >= 10000:
             get_and_ingest_2(connection, id_dict)

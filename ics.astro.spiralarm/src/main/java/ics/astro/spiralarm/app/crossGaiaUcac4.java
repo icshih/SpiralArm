@@ -4,13 +4,17 @@ import ics.astro.spiralarm.dm.crossGaiaUcac4Dm;
 import ics.astro.tap.TapGacs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.ac.starlink.table.StarTable;
+import uk.ac.starlink.table.StarTableFactory;
+import uk.ac.starlink.votable.VOTableBuilder;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 
 /**
  * SELECT g.source_id, u.original_ext_source_id AS ucac4_id
- FROM gaiadr1.ucac4_best_neighbour AS u, (SELECT * FROM gaiadr1.gaia_source WHERE l < 17 OR l > 285 OR (l > 72 AND l < 222) AND pmra IS NOT null AND pmdec IS NOT null AND parallax_error/parallax < 0.2) AS g
+ FROM gaiadr1.ucac4_best_neighbour AS u, (SELECT * FROM gaiadr1.gaia_source WHERE l < 17 OR l > 285 OR (l > 72 AND l < 222) AND pmra IS NOT null AND pmdec IS NOT null) AS g
  WHERE g.source_id = u.source_id AND u.number_of_mates = 0
  */
 public class crossGaiaUcac4 {
@@ -65,5 +69,35 @@ public class crossGaiaUcac4 {
            logger.error("", e);
         }
         return is;
+    }
+
+    /**
+     * Get StarTable of STIL
+     */
+    StarTable setStarTable(InputStream is) {
+        StarTable st = null;
+        // initiate row counting
+        StarTableFactory factory = new StarTableFactory();
+        try {
+            st = factory.makeStarTable(is, new VOTableBuilder());
+        } catch (IOException e) {
+            logger.error("Cannot access the votable input stream, see", e);
+        }
+        return st;
+    }
+
+    public static void main(String[] args) {
+
+        crossGaiaUcac4 app = new crossGaiaUcac4();
+        StarTable st = app.setStarTable(app.query());
+        Object[] obj;
+        for (long l = 0; l < st.getRowCount(); l++) {
+            try {
+                obj = st.getRow(l);
+
+            } catch (IOException e) {
+                logger.error("", e);
+            }
+        }
     }
 }

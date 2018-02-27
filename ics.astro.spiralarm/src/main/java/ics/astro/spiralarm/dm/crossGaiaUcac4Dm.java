@@ -24,7 +24,7 @@ public class crossGaiaUcac4Dm {
     double parallax;
     double parallaxError;
     double photGMeanMag;
-    double ucca4Id;
+    double ucac4Id;
     double bMag;
     double vMag;
 
@@ -141,12 +141,12 @@ public class crossGaiaUcac4Dm {
         this.photGMeanMag = photGMeanMag;
     }
 
-    public double getUcca4Id() {
-        return ucca4Id;
+    public double getUcac4Id() {
+        return ucac4Id;
     }
 
-    public void setUcca4Id(double ucca4Id) {
-        this.ucca4Id = ucca4Id;
+    public void setUcac4Id(double ucac4Id) {
+        this.ucac4Id = ucac4Id;
     }
 
     public double getbMag() {
