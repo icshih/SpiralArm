@@ -1,10 +1,12 @@
 import configparser
+import os.path
 import re
 import sys
 
 import numpy as np
 import numpy.ma as ma
 import psycopg2
+from astropy.io.votable import parse
 from astroquery.gaia import Gaia
 from astroquery.vizier import Vizier
 
@@ -54,25 +56,37 @@ def db_create_table(connection):
 
 
 def get_and_ingest(connection, id_dict, constraint):
+    print(constraint)
     insert = connection.cursor()
     result = Vizier.query_constraints(catalog='I/322A/out', UCAC4=constraint)
     dataset = result[0]
+    print(len(dataset))
     for i in np.arange(len(dataset)):
         ucac4 = dataset.field('UCAC4')[i]
         bmag = float(dataset.field('Bmag')[i])
         vmag = float(dataset.field('Vmag')[i])
         g_tuple = id_dict[ucac4]
-        insert.execute(
-            'INSERT INTO {0} (gaia_source_id, l, b, ra, ra_error, dec, dec_error, pmra, pmra_error, '
-            'pmdec, pmdec_error, parallax, parallax_error, phot_g_mean_mag, ucac4_id, b_mag, v_mag) '
-            'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);'.format(cross_match_table),
-            (g_tuple[0], g_tuple[1], g_tuple[2], g_tuple[3], g_tuple[4], g_tuple[5], g_tuple[6], g_tuple[7], g_tuple[8],
-             g_tuple[9], g_tuple[10], g_tuple[11], g_tuple[12], g_tuple[13], ucac4, bmag, vmag))
+        insert.execute("INSERT INTO gaia_ucac4 (gaia_source_id, l, b, ra, ra_error, dec, dec_error, pmra, pmra_error, pmdec, pmdec_error, parallax, parallax_error, phot_g_mean_mag, ucac4_id, b_mag, v_mag) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);", (int(g_tuple[0]), g_tuple[1], g_tuple[2], g_tuple[3], g_tuple[4], g_tuple[5], g_tuple[6], g_tuple[7], g_tuple[8], g_tuple[9], g_tuple[10], g_tuple[11], g_tuple[12], g_tuple[13], ucac4, bmag, vmag))
     connection.commit()
-    insert.close()
 
 
-def process(connection, dataset):
+def get_ucac4_b_v_mag(ucac4_id):
+    result = Vizier.query_constraints(catalog='I/322A/out', UCAC4=ucac4_id)
+    dataset = result[0]
+    bmag = float(dataset.field('Bmag')[0])
+    vmag = float(dataset.field('Vmag')[0])
+    return bmag, vmag
+
+
+def get_and_ingest_2(connection, id_dict):
+    print('Ingest {0} data...'.format(len(id_dict)))
+    insert = connection.cursor()
+    for k, v in id_dict.items():
+        insert.execute("INSERT INTO gaia_ucac4 (gaia_source_id, l, b, ra, ra_error, dec, dec_error, pmra, pmra_error, pmdec, pmdec_error, parallax, parallax_error, phot_g_mean_mag, ucac4_id, b_mag, v_mag) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);", (v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8], v[9], v[10], v[11], v[12], v[13], k, v[14], v[15]))
+    connection.commit()
+
+
+def process_query(connection, dataset):
     count = 0
     constraint = '<<'
     id_dict = dict()
@@ -104,6 +118,36 @@ def process(connection, dataset):
     get_and_ingest(connection, id_dict, constraint)
 
 
+def process_votable(connection, dataset):
+    count = 0
+    id_dict = dict()
+    for d in dataset.array:
+        f = ma.filled(d)
+        u_id = re.sub('UCAC4-', '', f['ucac4_id'].decode(encoding='UTF-8'))
+        g_id = f['source_id']
+        l = f['l']
+        b = f['b']
+        ra = f['ra']
+        ra_error = f['ra_error']
+        dec = f['dec']
+        dec_error = f['dec_error']
+        pmra = f['pmra']
+        pmra_error = f['pmra_error']
+        pmdec = f['pmdec']
+        pmdec_error = f['pmdec_error']
+        parallax = f['parallax']
+        parallax_error = f['parallax_error']
+        gmag = f['phot_g_mean_mag']
+        bmag, vmag = get_ucac4_b_v_mag(u_id)
+        id_dict[u_id] = g_id, l, b, ra, ra_error, dec, dec_error, pmra, pmra_error, pmdec, pmdec_error, parallax, parallax_error, gmag, bmag, vmag
+        count += 1
+        if count >= 10000:
+            get_and_ingest_2(connection, id_dict)
+            count = 0
+            id_dict.clear()
+    get_and_ingest_2(connection, id_dict)
+
+
 if __name__ == '__main__':
     if len(sys.argv) != 2:
         print('Usage: sa_cross_match.py /path/to/local.conf')
@@ -123,9 +167,14 @@ if __name__ == '__main__':
     OUTPUT = config.get('data', 'output.votable')
 
     conn = db_connect(HOST, PORT, DB, USER, PWORD)
-    job = Gaia.launch_job_async(query, output_file=OUTPUT, dump_to_file=True)
-    job_result = job.get_results()
-    # using constraint in VizieR, http://vizier.cfa.harvard.edu/vizier/vizHelp/cst.htx#char
     db_create_table(conn)
-    process(conn, job_result)
+
+    # using constraint in VizieR, http://vizier.cfa.harvard.edu/vizier/vizHelp/cst.htx#char
+    if os.path.exists(OUTPUT):
+        votable = parse(OUTPUT)
+        process_votable(conn, votable.get_first_table())
+    else:
+        job = Gaia.launch_job_async(query, output_file=OUTPUT, dump_to_file=True)
+        process_query(conn, job.get_results())
+
     conn.close()
