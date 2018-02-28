@@ -16,7 +16,7 @@ public class crossGaiaUcac4JpaTest {
 
     @BeforeEach
     void setUp() {
-        entityManagerFactory = Persistence.createEntityManagerFactory( "org.hibernate.tutorial.jpa" );
+        entityManagerFactory = Persistence.createEntityManagerFactory( "ics.astro.spiralarm" );
 
     }
 

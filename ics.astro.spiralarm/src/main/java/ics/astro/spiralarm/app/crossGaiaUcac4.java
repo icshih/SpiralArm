@@ -12,6 +12,9 @@ import uk.ac.starlink.table.StarTable;
 import uk.ac.starlink.table.StarTableFactory;
 import uk.ac.starlink.votable.VOTableBuilder;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -40,12 +43,23 @@ public class crossGaiaUcac4 {
             "JOIN gaiadr1.gaia_source AS g " +
             "ON (g.source_id = u.source_id) " +
             "WHERE g.pmra IS NOT null AND g.pmdec IS NOT null AND g.parallax_error/g.parallax < 0.2", getSelect("g"));
-    TapVIzieR vizier;
+    private TapVIzieR vizier;
+    private EntityManagerFactory entityManagerFactory;
 
     private static final Logger logger = LoggerFactory.getLogger(crossGaiaUcac4.class);
 
     public crossGaiaUcac4() {
         vizier = new TapVIzieR();
+        entityManagerFactory = Persistence.createEntityManagerFactory( "ics.astro.spiralarm" );
+    }
+
+    /**
+     * Closes Entity Manager Factory
+     */
+    public void closeEntityManager() {
+        if (entityManagerFactory != null) {
+            entityManagerFactory.close();
+        }
     }
     /**
      * Set up and override the default query to extract data from main Gaia and the crossed UCAC4 tables
@@ -67,7 +81,7 @@ public class crossGaiaUcac4 {
      * Runs asynchronous job and waiting for the final result
      * @return inputStream of the job result
      */
-    public InputStream query() {
+    InputStream query() {
         InputStream is = null;
         TapGacs gacs = new TapGacs();
         try {
@@ -84,6 +98,51 @@ public class crossGaiaUcac4 {
     }
 
     /**
+     * Gets main Gaia-UCAC4 crossed table
+     * @return
+     * @throws IOException
+     */
+    public StarTable getCrossGaiaUCAC4(Path path) throws IOException {
+        StarTable st;
+        if (path == null)
+            st = setStarTable(query());
+        else
+            st = setStarTable(path);
+        RowSequence rows = st.getRowSequence();
+        Object[] row;
+        List<crossGaiaUcac4Dm> data = new ArrayList<>();
+        crossGaiaUcac4Dm d;
+        while (rows.next()) {
+            row = rows.getRow();
+            System.out.println(String.format("%s %s", row[0], String.valueOf(row[14])).replace("UCAC4-", ""));
+            d = new crossGaiaUcac4Dm();
+            d.setSourceId((long) row[0]);
+            d.setL((double) row[1]);
+            d.setB((double) row[2]);
+            d.setRa((double) row[3]);
+            d.setRaError((double) row[4]);
+            d.setDec((double) row[5]);
+            d.setRaError((double) row[6]);
+            d.setPmra((double) row[7]);
+            d.setPmraError((double) row[8]);
+            d.setPmdec((double) row[9]);
+            d.setPmdecError((double) row[10]);
+            d.setParallax((double) row[11]);
+            d.setParallaxError((double) row[12]);
+            d.setPhotGMeanMag((double) row[13]);
+            d.setUcac4Id(String.valueOf(row[14]).replace("UCAC4-", ""));
+            data.add(d);
+            if (data.size() >= 1000) {
+                insertTable(data);
+                data.clear();
+            }
+        }
+        if (!data.isEmpty())
+            insertTable(data);
+        return st;
+    }
+
+    /**
      * Gets UCAC4 B, V Magnitudes
      * @param cguTable
      * @param indexUcac4Id
@@ -96,12 +155,12 @@ public class crossGaiaUcac4 {
         for (long l = 0; l < cguTable.getRowCount(); l++) {
                 builder.append("'").append(String.valueOf(cguTable.getCell(l, indexUcac4Id)).replace("UCAC4-", "")).append("'").append(",");
             if ((l+1)%1000 == 0) {
-                queryVizieR(builder);
+                insertTable(queryVizieR(builder));
                 builder = new StringBuilder();
             }
         }
         if (builder.length() != 0) {
-            queryVizieR(builder);
+            insertTable(queryVizieR(builder));
         }
     }
 
@@ -136,8 +195,13 @@ public class crossGaiaUcac4 {
         return temp;
     }
 
-    void insertTable() {
-
+    void insertTable(List<?> objects) {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        entityManager.getTransaction().begin();
+        for (Object o : objects)
+            entityManager.persist(o);
+        entityManager.getTransaction().commit();
+        entityManager.close();
     }
 
     /**
@@ -158,22 +222,19 @@ public class crossGaiaUcac4 {
     }
 
     public static void main(String[] args) {
-
+        // Need to read property file
         crossGaiaUcac4 app = new crossGaiaUcac4();
-        StarTable st = null;
         try {
-            st = app.setStarTable(app.query());
+            StarTable st = app.getCrossGaiaUCAC4(null);
+            app.getUcac4Photometry(st, 14);
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (TapException e) {
+            e.printStackTrace();
         }
-        Object[] obj;
-        for (long l = 0; l < st.getRowCount(); l++) {
-            try {
-                obj = st.getRow(l);
+        app.closeEntityManager();
 
-            } catch (IOException e) {
-                logger.error("", e);
-            }
-        }
     }
 }

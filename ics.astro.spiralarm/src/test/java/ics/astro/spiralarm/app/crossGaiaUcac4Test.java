@@ -3,7 +3,6 @@ package ics.astro.spiralarm.app;
 import ics.astro.spiralarm.dm.crossGaiaUcac4Dm;
 import ics.astro.spiralarm.dm.ucac4Dm;
 import ics.astro.tap.TapException;
-import ics.astro.tap.TapVIzieR;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,34 +57,9 @@ public class crossGaiaUcac4Test {
     }
 
     @Test
-    void testQuery() throws IOException {
-        StarTable st = test.setStarTable(Paths.get(Paths.get(System.getProperty("user.dir")).getParent().toString(), "data/sa_cgu_test.vot"));
-        RowSequence rows = st.getRowSequence();
-        Object[] row;
-        List<crossGaiaUcac4Dm> data = new ArrayList<>();
-        crossGaiaUcac4Dm d;
-        while (rows.next()) {
-            row = rows.getRow();
-            System.out.println(String.format("%s %s", row[0], String.valueOf(row[14])).replace("UCAC4-", ""));
-            d = new crossGaiaUcac4Dm();
-            d.setSourceId((long) row[0]);
-            d.setL((double) row[1]);
-            d.setB((double) row[2]);
-            d.setRa((double) row[3]);
-            d.setRaError((double) row[4]);
-            d.setDec((double) row[5]);
-            d.setRaError((double) row[6]);
-            d.setPmra((double) row[7]);
-            d.setPmraError((double) row[8]);
-            d.setPmdec((double) row[9]);
-            d.setPmdecError((double) row[10]);
-            d.setParallax((double) row[11]);
-            d.setParallaxError((double) row[12]);
-            d.setPhotGMeanMag((double) row[13]);
-            d.setUcac4Id(String.valueOf(row[14]).replace("UCAC4-", ""));
-            data.add(d);
-        }
-        assertEquals(10, data.size());
+    void testGetCrossGaiaUCAC4() throws IOException {
+        StarTable st = test.getCrossGaiaUCAC4(Paths.get(Paths.get(System.getProperty("user.dir")).getParent().toString(), "data/sa_cgu_test.vot"));
+        assertNotNull(st);
     }
 
     @Test
@@ -97,6 +71,7 @@ public class crossGaiaUcac4Test {
         }
         List<ucac4Dm> temp = test.queryVizieR(builder);
         assertEquals(10, temp.size());
+        test.insertTable(temp);
     }
 
     @Test

@@ -25,8 +25,27 @@ public class crossGaiaUcac4Dm {
     double parallaxError;
     double photGMeanMag;
     String ucac4Id;
-    double bMag;
-    double vMag;
+
+    public crossGaiaUcac4Dm() {
+    }
+
+    public crossGaiaUcac4Dm(long sourceId, double l, double b, double ra, double raError, double dec, double decError, double pmra, double pmraError, double pmdec, double pmdecError, double parallax, double parallaxError, double photGMeanMag, String ucac4Id) {
+       this.sourceId = sourceId;
+       this.l = l;
+       this.b = b;
+       this.ra = ra;
+       this.raError = raError;
+       this.dec = dec;
+       this.decError = decError;
+       this.pmra = pmra;
+       this.pmraError = pmraError;
+       this.pmdec = pmdec;
+       this.pmdecError = pmdecError;
+       this.parallax = parallax;
+       this.parallaxError = parallaxError;
+       this.photGMeanMag = photGMeanMag;
+       this.ucac4Id = ucac4Id;
+    }
 
     @Id
     public long getSourceId() {
@@ -147,22 +166,6 @@ public class crossGaiaUcac4Dm {
 
     public void setUcac4Id(String ucac4Id) {
         this.ucac4Id = ucac4Id;
-    }
-
-    public double getbMag() {
-        return bMag;
-    }
-
-    public void setbMag(double bMag) {
-        this.bMag = bMag;
-    }
-
-    public double getvMag() {
-        return vMag;
-    }
-
-    public void setvMag(double vMag) {
-        this.vMag = vMag;
     }
 
 
