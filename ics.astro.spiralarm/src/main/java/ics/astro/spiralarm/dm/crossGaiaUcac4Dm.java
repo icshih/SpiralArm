@@ -11,8 +11,8 @@ import javax.persistence.Table;
 public class crossGaiaUcac4Dm {
 
     long sourceId;
-    float l;
-    float b;
+    double l;
+    double b;
     double ra;
     double raError;
     double dec;
@@ -24,7 +24,7 @@ public class crossGaiaUcac4Dm {
     double parallax;
     double parallaxError;
     double photGMeanMag;
-    double ucac4Id;
+    String ucac4Id;
     double bMag;
     double vMag;
 
@@ -37,19 +37,19 @@ public class crossGaiaUcac4Dm {
         this.sourceId = sourceId;
     }
 
-    public float getL() {
+    public double getL() {
         return l;
     }
 
-    public void setL(float l) {
+    public void setL(double l) {
         this.l = l;
     }
 
-    public float getB() {
+    public double getB() {
         return b;
     }
 
-    public void setB(float b) {
+    public void setB(double b) {
         this.b = b;
     }
 
@@ -141,11 +141,11 @@ public class crossGaiaUcac4Dm {
         this.photGMeanMag = photGMeanMag;
     }
 
-    public double getUcac4Id() {
+    public String getUcac4Id() {
         return ucac4Id;
     }
 
-    public void setUcac4Id(double ucac4Id) {
+    public void setUcac4Id(String ucac4Id) {
         this.ucac4Id = ucac4Id;
     }
 

@@ -123,7 +123,7 @@
         <dependency>
             <groupId>ics.astro</groupId>
             <artifactId>tap-connection</artifactId>
-            <version>0.1.1</version>
+            <version>0.1.2</version>
         </dependency>
 
         <dependency>

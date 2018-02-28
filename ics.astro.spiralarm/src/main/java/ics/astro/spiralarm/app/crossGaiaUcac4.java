@@ -1,16 +1,25 @@
 package ics.astro.spiralarm.app;
 
 import ics.astro.spiralarm.dm.crossGaiaUcac4Dm;
+import ics.astro.spiralarm.dm.ucac4Dm;
+import ics.astro.tap.TapException;
 import ics.astro.tap.TapGacs;
+import ics.astro.tap.TapVIzieR;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.ac.starlink.table.RowSequence;
 import uk.ac.starlink.table.StarTable;
 import uk.ac.starlink.table.StarTableFactory;
 import uk.ac.starlink.votable.VOTableBuilder;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * SELECT g.source_id, u.original_ext_source_id AS ucac4_id
@@ -19,10 +28,7 @@ import java.lang.reflect.Field;
  */
 public class crossGaiaUcac4 {
 
-    private static final Logger logger = LoggerFactory.getLogger(crossGaiaUcac4.class);
-
     public static final String tableName = "CROSS_GAIA_UCAC4";
-
     public String query = String.format("SELECT %s " +
             "FROM (" +
             "SELECT source_id, original_ext_source_id AS ucac4_id " +
@@ -34,7 +40,13 @@ public class crossGaiaUcac4 {
             "JOIN gaiadr1.gaia_source AS g " +
             "ON (g.source_id = u.source_id) " +
             "WHERE g.pmra IS NOT null AND g.pmdec IS NOT null AND g.parallax_error/g.parallax < 0.2", getSelect("g"));
+    TapVIzieR vizier;
 
+    private static final Logger logger = LoggerFactory.getLogger(crossGaiaUcac4.class);
+
+    public crossGaiaUcac4() {
+        vizier = new TapVIzieR();
+    }
     /**
      * Set up and override the default query to extract data from main Gaia and the crossed UCAC4 tables
      * @param query
@@ -72,24 +84,88 @@ public class crossGaiaUcac4 {
     }
 
     /**
+     * Gets UCAC4 B, V Magnitudes
+     * @param cguTable
+     * @param indexUcac4Id
+     * @throws IOException
+     * @throws TapException
+     * @throws InterruptedException
+     */
+    public void getUcac4Photometry(StarTable cguTable, int indexUcac4Id) throws IOException, TapException, InterruptedException {
+        StringBuilder builder = new StringBuilder();
+        for (long l = 0; l < cguTable.getRowCount(); l++) {
+                builder.append("'").append(String.valueOf(cguTable.getCell(l, indexUcac4Id)).replace("UCAC4-", "")).append("'").append(",");
+            if ((l+1)%1000 == 0) {
+                queryVizieR(builder);
+                builder = new StringBuilder();
+            }
+        }
+        if (builder.length() != 0) {
+            queryVizieR(builder);
+        }
+    }
+
+    /**
+     * Queries UCAC4 table
+     * @param builder
+     * @return
+     * @throws IOException
+     * @throws TapException
+     * @throws InterruptedException
+     */
+    List<ucac4Dm> queryVizieR(StringBuilder builder) throws IOException, TapException, InterruptedException {
+        List<ucac4Dm> temp = null;
+        String query = "SELECT ucac4, bmag, vmag FROM \"I/322A/out\" WHERE UCAC4 IN (%s)";
+        String jobId = vizier.runAsynchronousJob(String.format(query, builder.substring(0, builder.length()-1)), "votable");
+        String phase = vizier.updateJobPhase(jobId, 1000);
+        if (phase.equals("COMPLETED")) {
+            InputStream is = vizier.getJobResult(jobId);
+            StarTable st = this.setStarTable(is);
+            RowSequence rows = st.getRowSequence();
+            Object[] row;
+            temp = new ArrayList<>();
+            ucac4Dm data;
+            while (rows.next()) {
+                row = rows.getRow();
+                data = new ucac4Dm(String.valueOf(row[0]), (float) row[1], (float) row[2]);
+                temp.add(data);
+            }
+        } else {
+            logger.error("The query job ended in {}", phase);
+        }
+        return temp;
+    }
+
+    void insertTable() {
+
+    }
+
+    /**
      * Get StarTable of STIL
      */
-    StarTable setStarTable(InputStream is) {
-        StarTable st = null;
+    StarTable setStarTable(InputStream is) throws IOException {
         // initiate row counting
         StarTableFactory factory = new StarTableFactory();
-        try {
-            st = factory.makeStarTable(is, new VOTableBuilder());
-        } catch (IOException e) {
-            logger.error("Cannot access the votable input stream, see", e);
-        }
-        return st;
+        return factory.makeStarTable(is, new VOTableBuilder());
+    }
+
+    /**
+     * Get StarTable of STIL
+     */
+    StarTable setStarTable(Path path) throws IOException {
+        InputStream is = new FileInputStream(path.toFile());
+        return setStarTable(is);
     }
 
     public static void main(String[] args) {
 
         crossGaiaUcac4 app = new crossGaiaUcac4();
-        StarTable st = app.setStarTable(app.query());
+        StarTable st = null;
+        try {
+            st = app.setStarTable(app.query());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Object[] obj;
         for (long l = 0; l < st.getRowCount(); l++) {
             try {
