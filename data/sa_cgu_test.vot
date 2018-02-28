@@ -1,0 +1,66 @@
+<VOTABLE version="1.3" xmlns="http://www.ivoa.net/xml/VOTable/v1.3">
+<RESOURCE type="results">
+<INFO name="QUERY_STATUS" value="OK"/>
+<INFO name="QUERY"><![CDATA[SELECT TOP 10 g.source_id, g.l, g.b, g.ra, g.ra_error, g.dec, g.dec_error, g.pmra, g.pmra_error, g.pmdec, g.pmdec_error, g.parallax, g.parallax_error, g.phot_g_mean_mag, u.original_ext_source_id AS ucac4_id 
+FROM gaiadr1.ucac4_best_neighbour AS u, (SELECT source_id, l, b, ra, ra_error, dec, dec_error, pmra, pmra_error, pmdec, pmdec_error, parallax, parallax_error, phot_g_mean_mag FROM gaiadr1.gaia_source WHERE pmra IS NOT NULL AND pmdec IS NOT NULL AND parallax IS NOT NULL AND (l < 17 OR l > 285 OR (l > 72 AND l < 222))) AS g 
+WHERE g.source_id = u.source_id AND u.number_of_mates = 0]]></INFO>
+<INFO name="CAPTION"><![CDATA[If you use public Gaia DR1 data in your paper, please take note of our guide on how to acknowledge and cite Gaia DR1: http://gaia.esac.esa.int/documentation/GDR1/Miscellaneous/sec_credit_and_citation_instructions.html]]></INFO>
+<INFO name="PAGE"></INFO>
+<INFO name="PAGE_SIZE"></INFO>
+<INFO name="JOBID"><![CDATA[1519816678370O]]></INFO>
+<INFO name="JOBNAME"></INFO>
+<TABLE>
+<FIELD datatype="long" name="source_id"/>
+<FIELD datatype="double" name="l"/>
+<FIELD datatype="double" name="b"/>
+<FIELD datatype="double" name="ra"/>
+<FIELD datatype="double" name="ra_error"/>
+<FIELD datatype="double" name="dec"/>
+<FIELD datatype="double" name="dec_error"/>
+<FIELD datatype="double" name="pmra"/>
+<FIELD datatype="double" name="pmra_error"/>
+<FIELD datatype="double" name="pmdec"/>
+<FIELD datatype="double" name="pmdec_error"/>
+<FIELD datatype="double" name="parallax"/>
+<FIELD datatype="double" name="parallax_error"/>
+<FIELD datatype="double" name="phot_g_mean_mag"/>
+<FIELD arraysize="*" datatype="char" name="ucac4_id" ucd="meta.id.cross">
+<DESCRIPTION>The unique source identifier in the original External catalogue.</DESCRIPTION>
+</FIELD>
+<DATA>
+<BINARY2>
+<STREAM encoding='base64'>
+AAA8HYSAAAMEgEAIHAEWhgZwQDlTnSPk/gdAbsGYi8Xcrj/JMIhSd36UwCfLvNwJ
+1vw/wQwsFqLTvsAAmWcU+XioP7PHVMZ68QfAQQKptXmgxT+rzMAV62LLQBw60FNB
+Qh4/zogOgYOcakAdr0XgIAsoAAAAEFVDQUM0LTM5MS0wNjgwOTkAADwYP4AACAGA
+QAWUD/1JPDhANuOeY1mVW0Bu+vDctLKkP82v68IphL/AKz4je6PYDj/P+einMaBO
+wAeYPgHjb/w/5qIyQuTfVcAnDEaGL5CDP9nfNJ5sxpg/6RSIHG4ZQD/TOC/g5LMr
+QCTzUGNuCRQAAAAQVUNBQzQtMzgyLTA3Mzk5OAAAPBRqiAAfjYBAdm2hi9xCxkA5
+WCd+vE3RQG5zDvD8aJQ/1aAyM4u5ncAtm8efBw1QP9EJI1P6sZ7AIFaslvAHtz/r
+/lESVUVPwCdhnjtDK3Y/4j5XUFem1UAPzaXnZNLFP9AWXpYNty1AJpKdv2B8dwAA
+ABBVQ0FDNC0zNzYtMDc1ODQwAAA8FXEAAAbaAEB2ZvRLQwlLQDqaRQD4N6NAbktk
+/+guET/VUOoDeD+3wCyKuQZCAj4/0SsxlV00NcBTfVeFu8CYP+nlokJcbJfASshl
+O+/1dD/iLQb0SXD0QBPxdgp9otQ/zzagZMKdb0AiLUfD25YSAAAAEFVDQUM0LTM3
+OS0wNzMzMzkAADyVZXAACC4AQCymoPrGyYhAN0+pXCdk80Bvth0s+dnuP9TGrwAm
+cbvAEm7CPXi9jD/Wfquq4I4mwBHOwUxhv+0/6fry5+M3vsAlZKmmlekGP+UdWQDj
+By8//7wEByorij/St89UoF9zQCagK5r8hGsAAAAQVUNBQzQtNDI3LTA2NTg3MAAA
+PJRHSAAfW4BAK5lnJ8Qw1EA2fyN8VNX0QG/D7MWSFNs/1gmtF0hd1cAVz5K+ft0n
+P9Q9aJWkTxVANaN1OHi3sj/oYIJZkcpywDRWBVI63n8/6UHzb1TTNEARHW+JoSIA
+P9S88Tq77bRAJRxHDnKlYAAAABBVQ0FDNC00MjMtMDY5OTMxAAA8l9DIACClAEAw
+v8fKX5FcQDajQrsV0qtAb+4QI4q3RT/WhqmOgweowAh/pm0sbZg/0yG92h3gDL/y
++U33nttWP+tQHwQmN3FAF77pDPrXxT/jlocRv23YQABvEWTlloo/0MwapsGmGEAl
+x2UczUGRAAAAEFVDQUM0LTQzNS0wNjc0MDkAADyXAFgAGUwAQC9Dg/2VeXhANkWk
+C4ISYkBv5tkv0+RyP9ReCWgoUBTAEImaVEVXjj/owAmAqOD4QAFGQoGtCS0/9u3a
+siLbR8AhJPkKeTBXP/C3ECdbzUxAEFUTtL9hkz/nGdcxsDd0QCarycRiaj0AAAAQ
+VUNBQzQtNDMwLTA2NzczOQAAQSoeKAAIGABAcfK/Y28lH8BHBZqzigMZQEUTTWZi
+y/4/1/kauhznYsBQ1XKTw2DfP9HByj59i81AGBWaXd9Jbj/odugVW84mwAa54pXd
+eFQ/88LF8kKonz/kkSZH/JsHP9peRNhS4zNAJLqWBnTPUAAAABBVQ0FDNC0xMTQt
+MDAyNDExAABBLRBoAAUKAEByJmhP9YPtwEgCS3X+bDFAQU2ktbEMhz/LusWU7hoD
+wFC8FIgttNw/v8IDHU7ciUA/zsjFwiVtP9/IlrvcchBAIMWCPcfaTD/kEELPSZ4a
+QBK53uSxdC4/0CWCLfifbUAlf+1QfFucAAAAEFVDQUM0LTExNi0wMDIwNDc=
+</STREAM>
+</BINARY2>
+</DATA>
+</TABLE>
+</RESOURCE>
+</VOTABLE>
