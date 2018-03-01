@@ -2,6 +2,7 @@ package ics.astro.spiralarm.app;
 
 import ics.astro.spiralarm.dm.ucac4Dm;
 import ics.astro.tap.TapException;
+import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -84,7 +85,7 @@ public class crossGaiaUcac4Test {
         System.out.println(2021%1000);
     }
 
-    @Test
+    @Test@Ignore
     void testMain() throws InterruptedException, IOException, TapException {
 //        StarTable st = test.getCrossGaiaUCAC4(Paths.get(Paths.get(System.getProperty("user.dir")).getParent().toString(), "data/sa_crossGaiaUcac4.vot"));
         StarTable st = test.setStarTable(Paths.get(Paths.get(System.getProperty("user.dir")).getParent().toString(), "data/sa_crossGaiaUcac4.vot"));
