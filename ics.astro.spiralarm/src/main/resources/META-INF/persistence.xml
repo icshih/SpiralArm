@@ -11,10 +11,11 @@
 
     <persistence-unit name="ics.astro.spiralarm">
         <description>
-            Persistence unit for the JPA tutorial of the Hibernate Getting Started Guide
+            Persistence unit for the Spiral Arm data
         </description>
 
-        <class>org.hibernate.tutorial.em.Event</class>
+        <class>oics.astro.spiralarm.dm.crossGaiaUcac4Dm</class>
+        <class>oics.astro.spiralarm.dm.ucac4Dm</class>
 
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" />

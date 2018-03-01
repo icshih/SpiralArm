@@ -1,18 +1,15 @@
 package ics.astro.spiralarm.app;
 
-import ics.astro.spiralarm.dm.crossGaiaUcac4Dm;
 import ics.astro.spiralarm.dm.ucac4Dm;
 import ics.astro.tap.TapException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.ac.starlink.table.RowSequence;
 import uk.ac.starlink.table.StarTable;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,6 +60,12 @@ public class crossGaiaUcac4Test {
     }
 
     @Test
+    void testGetUcac4Photometry() throws IOException, TapException, InterruptedException {
+        StarTable st = test.setStarTable(Paths.get(Paths.get(System.getProperty("user.dir")).getParent().toString(), "data/sa_cgu_test.vot"));
+        test.getUcac4Photometry(st, 14);
+    }
+
+    @Test
     void testQueryVizieR() throws IOException, TapException, InterruptedException {
         StarTable st = test.setStarTable(Paths.get(Paths.get(System.getProperty("user.dir")).getParent().toString(), "data/sa_cgu_test.vot"));
         StringBuilder builder = new StringBuilder();
@@ -79,5 +82,12 @@ public class crossGaiaUcac4Test {
         System.out.println(1998%1000);
         System.out.println(2000%1000);
         System.out.println(2021%1000);
+    }
+
+    @Test
+    void testMain() throws InterruptedException, IOException, TapException {
+//        StarTable st = test.getCrossGaiaUCAC4(Paths.get(Paths.get(System.getProperty("user.dir")).getParent().toString(), "data/sa_crossGaiaUcac4.vot"));
+        StarTable st = test.setStarTable(Paths.get(Paths.get(System.getProperty("user.dir")).getParent().toString(), "data/sa_crossGaiaUcac4.vot"));
+        test.getUcac4Photometry(st, 14);
     }
 }

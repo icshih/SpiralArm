@@ -16,11 +16,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -154,7 +154,7 @@ public class crossGaiaUcac4 {
         StringBuilder builder = new StringBuilder();
         for (long l = 0; l < cguTable.getRowCount(); l++) {
                 builder.append("'").append(String.valueOf(cguTable.getCell(l, indexUcac4Id)).replace("UCAC4-", "")).append("'").append(",");
-            if ((l+1)%1000 == 0) {
+            if ((l+1)%400 == 0) {
                 insertTable(queryVizieR(builder));
                 builder = new StringBuilder();
             }
@@ -221,11 +221,10 @@ public class crossGaiaUcac4 {
         return setStarTable(is);
     }
 
-    public static void main(String[] args) {
-        // Need to read property file
+    static void run() {
         crossGaiaUcac4 app = new crossGaiaUcac4();
         try {
-            StarTable st = app.getCrossGaiaUCAC4(null);
+            StarTable st = app.getCrossGaiaUCAC4(Paths.get("/Users/icshih/Documents/Research/SpiralArm/data/sa_crossGaiaUcac4.vot"));
             app.getUcac4Photometry(st, 14);
         } catch (IOException e) {
             e.printStackTrace();
@@ -235,6 +234,10 @@ public class crossGaiaUcac4 {
             e.printStackTrace();
         }
         app.closeEntityManager();
+    }
 
+    public static void main(String[] args) {
+        crossGaiaUcac4 app = new crossGaiaUcac4();
+        // issue similar to https://stackoverflow.com/questions/48244184/java-9-hibernate-and-java-sql-javax-transaction
     }
 }
