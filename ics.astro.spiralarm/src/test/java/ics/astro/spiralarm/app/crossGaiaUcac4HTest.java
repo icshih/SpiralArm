@@ -2,7 +2,6 @@ package ics.astro.spiralarm.app;
 
 import ics.astro.spiralarm.dm.ucac4Dm;
 import ics.astro.tap.TapException;
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,13 +15,13 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class crossGaiaUcac4Test {
+public class crossGaiaUcac4HTest {
 
     String testQuery = "SELECT TOP 10 g.source_id, g.l, g.b, g.ra, g.ra_error, g.dec, g.dec_error, g.pmra, g.pmra_error, g.pmdec, g.pmdec_error, g.parallax, g.parallax_error, g.phot_g_mean_mag, u.original_ext_source_id AS ucac4_id " +
             "FROM gaiadr1.ucac4_best_neighbour AS u, (SELECT * FROM gaiadr1.gaia_source WHERE l < 17 OR l > 285 OR (l > 72 AND l < 222)) AS g " +
             "WHERE g.source_id = u.source_id AND g.pmra IS NOT null AND g.pmdec IS NOT null AND g.parallax IS NOT null AND u.number_of_mates = 0";
 
-    crossGaiaUcac4 test = new crossGaiaUcac4();
+    crossGaiaUcac4H test = new crossGaiaUcac4H();
 
     @BeforeEach
     void setUp() {
@@ -101,8 +100,8 @@ public class crossGaiaUcac4Test {
 
     @Test
     void testMain() throws InterruptedException, IOException, TapException {
-//        StarTable st = test.getCrossGaiaUCAC4(Paths.get(Paths.get(System.getProperty("user.dir")).getParent().toString(), "data/sa_crossGaiaUcac4.vot"));
-        StarTable st = test.setStarTable(Paths.get(Paths.get(System.getProperty("user.dir")).getParent().toString(), "data/sa_crossGaiaUcac4.vot"));
+        StarTable st = test.getCrossGaiaUCAC4(Paths.get(Paths.get(System.getProperty("user.dir")).getParent().toString(), "data/sa_cgu_test.vot"));
+//        StarTable st = test.setStarTable(Paths.get(Paths.get(System.getProperty("user.dir")).getParent().toString(), "data/sa_crossGaiaUcac4.vot"));
         test.getUcac4Photometry(st, 14);
     }
 }

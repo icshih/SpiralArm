@@ -7,7 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table( name = crossGaiaUcac4.tableName )
+@Table( name = crossGaiaUcac4.crossTableName )
 public class crossGaiaUcac4Dm {
 
     long sourceId;

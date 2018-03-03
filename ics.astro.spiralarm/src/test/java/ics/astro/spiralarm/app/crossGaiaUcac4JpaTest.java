@@ -40,7 +40,7 @@ public class crossGaiaUcac4JpaTest {
         // now lets pull events from the database and list them
         entityManager = entityManagerFactory.createEntityManager();
         entityManager.getTransaction().begin();
-        List result = entityManager.createQuery( String.format("from %s", crossGaiaUcac4.tableName), crossGaiaUcac4Dm.class ).getResultList();
+        List result = entityManager.createQuery( String.format("from %s", crossGaiaUcac4.crossTableName), crossGaiaUcac4Dm.class ).getResultList();
         for ( crossGaiaUcac4Dm event : (List<crossGaiaUcac4Dm>) result ) {
             System.out.println( "Data (" + event.getSourceId() + ") : " + event.getUcac4Id() );
         }

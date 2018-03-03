@@ -15,7 +15,7 @@
 
         <!-- Database connection settings -->
         <property name="connection.driver_class">org.postgresql.Driver</property>
-        <property name="connection.url">jdbc:postgresql://db:5432/postgres</property>
+        <property name="connection.url">jdbc:postgresql://0.0.0.0:10000/postgres</property>
         <property name="connection.username">postgres</property>
         <property name="connection.password"/>
 
@@ -34,7 +34,8 @@
         <!-- Drop and re-create the database schema on startup -->
         <property name="hbm2ddl.auto">create</property>
 
-        <mapping resource="ics/astro/spiralarm/dm/crossGaiaUcac4Dm"/>
+        <mapping class="ics.astro.spiralarm.dm.crossGaiaUcac4Dm"/>
+        <mapping class="ics.astro.spiralarm.dm.ucac4Dm"/>
 
     </session-factory>
 

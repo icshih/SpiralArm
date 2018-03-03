@@ -5,6 +5,11 @@ import ics.astro.spiralarm.dm.ucac4Dm;
 import ics.astro.tap.TapException;
 import ics.astro.tap.TapGacs;
 import ics.astro.tap.TapVIzieR;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistry;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.starlink.table.RowSequence;
@@ -12,9 +17,6 @@ import uk.ac.starlink.table.StarTable;
 import uk.ac.starlink.table.StarTableFactory;
 import uk.ac.starlink.votable.VOTableBuilder;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,27 +31,30 @@ import java.util.List;
  FROM gaiadr1.ucac4_best_neighbour AS u, (SELECT * FROM gaiadr1.gaia_source WHERE l < 17 OR l > 285 OR (l > 72 AND l < 222) AND pmra IS NOT null AND pmdec IS NOT null) AS g
  WHERE g.source_id = u.source_id AND u.number_of_mates = 0
  */
-public class crossGaiaUcac4 {
+public class crossGaiaUcac4H {
 
     public static final String crossTableName = "CROSS_GAIA_UCAC4";
     public static final String ucac4TableName = "UCAC4";
     public String query;
     private TapVIzieR vizier;
-    private EntityManagerFactory entityManagerFactory;
+    private SessionFactory sessionFactory;;
 
-    private static final Logger logger = LoggerFactory.getLogger(crossGaiaUcac4.class);
+    private static final Logger logger = LoggerFactory.getLogger(crossGaiaUcac4H.class);
 
-    public crossGaiaUcac4() {
-        vizier = new TapVIzieR();
-        entityManagerFactory = Persistence.createEntityManagerFactory( "ics.astro.spiralarm" );
+    public crossGaiaUcac4H() {
+        StandardServiceRegistry standardRegistry = new StandardServiceRegistryBuilder()
+                .configure( "hibernate.cfg.xml" )
+                .build();
+        sessionFactory = new MetadataSources(standardRegistry).buildMetadata().buildSessionFactory();
+            vizier = new TapVIzieR();
     }
 
     /**
      * Closes Entity Manager Factory
      */
     public void closeEntityManager() {
-        if (entityManagerFactory != null) {
-            entityManagerFactory.close();
+        if (sessionFactory != null) {
+            sessionFactory.close();
         }
     }
     /**
@@ -224,12 +229,12 @@ public class crossGaiaUcac4 {
     }
 
     void insertTable(List<?> objects) {
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        entityManager.getTransaction().begin();
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
         for (Object o : objects)
-            entityManager.persist(o);
-        entityManager.getTransaction().commit();
-        entityManager.close();
+            session.persist(o);
+        session.getTransaction().commit();
+        session.close();
     }
 
     /**
@@ -250,7 +255,7 @@ public class crossGaiaUcac4 {
     }
 
     static void run() {
-        crossGaiaUcac4 app = new crossGaiaUcac4();
+        crossGaiaUcac4H app = new crossGaiaUcac4H();
         try {
             StarTable st = app.getCrossGaiaUCAC4(Paths.get("/Users/icshih/Documents/Research/SpiralArm/data/sa_crossGaiaUcac4.vot"));
             app.getUcac4Photometry(st, 14);
@@ -264,8 +269,13 @@ public class crossGaiaUcac4 {
         app.closeEntityManager();
     }
 
+    /**
+     * Annotation with Hibernate API
+     *
+     * JPA has split module issue in Java 9, see https://stackoverflow.com/questions/48244184/java-9-hibernate-and-java-sql-javax-transaction
+     * @param args
+     */
     public static void main(String[] args) {
-        crossGaiaUcac4 app = new crossGaiaUcac4();
-        // issue similar to https://stackoverflow.com/questions/48244184/java-9-hibernate-and-java-sql-javax-transaction
+        crossGaiaUcac4H app = new crossGaiaUcac4H();
     }
 }

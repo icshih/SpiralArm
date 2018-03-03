@@ -1,11 +1,13 @@
 package ics.astro.spiralarm.dm;
 
+import ics.astro.spiralarm.app.crossGaiaUcac4;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "UCAC4")
+@Table( name = crossGaiaUcac4.ucac4TableName )
 public class ucac4Dm {
 
     String ucac4Id;
