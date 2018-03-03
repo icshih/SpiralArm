@@ -1,5 +1,6 @@
 module ics.astro.spiralarm {
     requires java.naming;
+//    requires java.sql;
     requires javax.transaction.api;
     requires slf4j.api;
     requires logback.classic;
